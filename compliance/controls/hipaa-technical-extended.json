@@ -1,0 +1,267 @@
+{
+  "_meta": {
+    "name": "BobGuard Extended HIPAA Controls (Technical Safeguards)",
+    "schema_version": "1.0.0",
+    "based_on": "hipaa_complete_controls.json (AuditGuardX, 98 controls)",
+    "extends": "Adds bobguard.* fields for code-time enforcement and PR refusal",
+    "regulation_baseline": "HIPAA Security Rule, 45 CFR Part 164 Subpart C (existing rule, 2013 revision)",
+    "forward_compat_overlay": "compliance/controls/hipaa-2024-nprm-overlay.json",
+    "hhs_references_path": "compliance/references/hhs/"
+  },
+  "controls": [
+    {
+      "control_id": "164.312(a)(1)",
+      "control_name": "Access Control",
+      "family": "Technical Safeguards",
+      "description": "Implement technical policies and procedures for electronic information systems that maintain electronic protected health information to allow access only to those persons or software programs that have been granted access rights as specified in §164.308(a)(4) (Information Access Management).",
+      "keywords": ["access control", "technical access control", "system access", "access rights", "access privileges", "logical access"],
+      "bobguard": {
+        "severity": "block",
+        "code_patterns": [
+          { "lang": "ts", "kind": "regex", "match": "app\\.(get|post|put|delete|patch)\\s*\\(\\s*['\"][^'\"]*\\b(patient|record|ehr|chart)\\b[^'\"]*['\"]\\s*,\\s*(?!.*authn|.*authz|.*requireAuth)", "comment": "PHI route registered without auth middleware" },
+          { "lang": "ts", "kind": "regex", "match": "router\\.\\w+\\([^,]+,\\s*async\\s*\\([^)]*\\)\\s*=>\\s*\\{[^}]*prisma\\.(patient|encounter|diagnosis)", "comment": "Direct ORM access to PHI without RBAC check" }
+        ],
+        "fix_template": "templates/fixes/add-rbac-middleware.ts",
+        "evidence_artifacts": ["control-mapping", "rbac-policy-snapshot", "access-log-sample"],
+        "refusal_template": "❌ HIPAA §164.312(a)(1) — route {route} accesses ePHI without an access-control gate. Trust is built by saying no. Proposed fix: add `requireRole('clinician'|'admin')` middleware and an audit-log hook.",
+        "auditor_questions": [
+          "How are access rights enforced at the application layer?",
+          "How is the principle of minimum necessary applied?",
+          "What is the workflow for granting and revoking access?"
+        ],
+        "hhs_source": "techsafeguards.pdf",
+        "nprm_2024_status": "remains_required_with_clarification"
+      }
+    },
+    {
+      "control_id": "164.312(a)(2)(i)",
+      "control_name": "Unique User Identification (Required)",
+      "family": "Technical Safeguards",
+      "description": "Assign a unique name and/or number for identifying and tracking user identity.",
+      "keywords": ["unique user identification", "user ID", "user identity", "user tracking", "unique identifier", "username"],
+      "bobguard": {
+        "severity": "block",
+        "code_patterns": [
+          { "lang": "ts", "kind": "regex", "match": "user(Id|_id)\\s*[:=]\\s*['\"](shared|common|service|admin|root)['\"]", "comment": "Shared/generic user identifier in code" },
+          { "lang": "ts", "kind": "regex", "match": "createSession\\([^)]*\\bservice(Account)?\\b", "comment": "Session created with service/shared account in PHI context" }
+        ],
+        "fix_template": "templates/fixes/per-user-identity.ts",
+        "evidence_artifacts": ["control-mapping", "identity-provider-config"],
+        "refusal_template": "❌ HIPAA §164.312(a)(2)(i) — generic identifier '{value}' used in ePHI session creation. Each user must be uniquely identifiable. Proposed fix: route through identity provider and persist `subjectId`.",
+        "auditor_questions": [
+          "How is each accessing user uniquely identified?",
+          "Are service accounts ever used in ePHI workflows? If so, how are they distinguished from human users in audit logs?"
+        ],
+        "hhs_source": "techsafeguards.pdf",
+        "nprm_2024_status": "remains_required"
+      }
+    },
+    {
+      "control_id": "164.312(a)(2)(ii)",
+      "control_name": "Emergency Access Procedure (Required)",
+      "family": "Technical Safeguards",
+      "description": "Establish (and implement as needed) procedures for obtaining necessary electronic protected health information during an emergency.",
+      "keywords": ["emergency access", "emergency procedure", "break glass", "emergency EPHI access", "crisis access"],
+      "bobguard": {
+        "severity": "warn",
+        "code_patterns": [
+          { "lang": "ts", "kind": "regex", "match": "//\\s*(TODO|FIXME).*emergency", "comment": "Unimplemented emergency access path" }
+        ],
+        "fix_template": "templates/fixes/break-glass.ts",
+        "evidence_artifacts": ["control-mapping", "break-glass-policy"],
+        "refusal_template": "⚠️ HIPAA §164.312(a)(2)(ii) — emergency access procedure marked as unimplemented at {file}:{line}. Proposed fix: implement break-glass with elevated audit logging.",
+        "auditor_questions": [
+          "What is the emergency access procedure?",
+          "How are break-glass events flagged in the audit log?"
+        ],
+        "hhs_source": "techsafeguards.pdf",
+        "nprm_2024_status": "remains_required"
+      }
+    },
+    {
+      "control_id": "164.312(a)(2)(iii)",
+      "control_name": "Automatic Logoff (Addressable)",
+      "family": "Technical Safeguards",
+      "description": "Implement electronic procedures that terminate an electronic session after a predetermined time of inactivity.",
+      "keywords": ["automatic logoff", "session timeout", "inactivity timeout", "auto logout", "idle session", "screen lock"],
+      "bobguard": {
+        "severity": "warn",
+        "code_patterns": [
+          { "lang": "ts", "kind": "regex", "match": "session\\(\\s*\\{[^}]*maxAge:\\s*([0-9]{8,}|\\d+\\s*\\*\\s*\\d+\\s*\\*\\s*\\d+\\s*\\*\\s*\\d+)", "comment": "Session maxAge unusually long (>1 day)" },
+          { "lang": "ts", "kind": "regex", "match": "session\\(\\s*\\{(?![^}]*maxAge)", "comment": "Session config without explicit maxAge" }
+        ],
+        "fix_template": "templates/fixes/session-timeout.ts",
+        "evidence_artifacts": ["control-mapping", "session-config"],
+        "refusal_template": "⚠️ HIPAA §164.312(a)(2)(iii) — session at {file}:{line} lacks an inactivity-based logoff. Proposed fix: set `maxAge` ≤ 15 minutes for ePHI-handling sessions.",
+        "auditor_questions": ["What is the session inactivity timeout for users with ePHI access?"],
+        "hhs_source": "techsafeguards.pdf",
+        "nprm_2024_status": "would_become_required"
+      }
+    },
+    {
+      "control_id": "164.312(a)(2)(iv)",
+      "control_name": "Encryption and Decryption (Addressable)",
+      "family": "Technical Safeguards",
+      "description": "Implement a mechanism to encrypt and decrypt electronic protected health information.",
+      "keywords": ["encryption", "decryption", "data encryption", "encryption at rest", "cryptography", "data protection"],
+      "bobguard": {
+        "severity": "block",
+        "code_patterns": [
+          { "lang": "ts", "kind": "regex", "match": "(dob|ssn|mrn|medicalRecordNumber|diagnosis|patientId|insuranceNumber)\\s*:\\s*string", "comment": "Unencrypted PHI primitive type at rest" },
+          { "lang": "ts", "kind": "regex", "match": "prisma\\.\\w+\\.(create|update|upsert)\\s*\\(\\s*\\{[^}]*data:\\s*\\{[^}]*(dob|ssn|mrn)\\s*:\\s*[^}]*\\}", "comment": "ORM write of PHI without encryption helper" },
+          { "lang": "ts", "kind": "regex", "match": "fs\\.writeFile.*\\b(patient|chart|record|ehr)\\b", "comment": "PHI written to disk via plain filesystem call" }
+        ],
+        "fix_template": "templates/fixes/encrypt-field-at-rest.ts",
+        "evidence_artifacts": ["control-mapping", "encryption-key-rotation-evidence", "data-flow-diagram", "test-evidence"],
+        "refusal_template": "❌ HIPAA §164.312(a)(2)(iv) — `{field}` is ePHI stored unencrypted at rest in {file}:{line}. Trust is built by saying no. Proposed fix: wrap with `encryptAtRest()` from `lib/phi-crypto.ts`. Forward-compat: under the 2024 HIPAA Security Rule NPRM this control is proposed to move from addressable to required; BobGuard already enforces the stricter standard.",
+        "auditor_questions": [
+          "How is ePHI encrypted at rest?",
+          "What is the key management mechanism (KMS, HSM, app-managed)?",
+          "How is encryption key rotation evidenced?"
+        ],
+        "hhs_source": "techsafeguards.pdf",
+        "nprm_2024_status": "would_become_required"
+      }
+    },
+    {
+      "control_id": "164.312(b)",
+      "control_name": "Audit Controls",
+      "family": "Technical Safeguards",
+      "description": "Implement hardware, software, and/or procedural mechanisms that record and examine activity in information systems that contain or use electronic protected health information.",
+      "keywords": ["audit controls", "audit logs", "audit trail", "system logging", "activity recording", "audit mechanisms", "SIEM"],
+      "bobguard": {
+        "severity": "block",
+        "code_patterns": [
+          { "lang": "ts", "kind": "regex", "match": "app\\.(get|post|put|delete|patch)\\s*\\([^)]*\\b(patient|record|chart|ehr)\\b[^)]*\\)\\s*[^{]*\\{(?![^}]*(audit|logEvent|emitAudit))", "comment": "PHI route without audit-log hook" }
+        ],
+        "fix_template": "templates/fixes/audit-log-hook.ts",
+        "evidence_artifacts": ["control-mapping", "audit-log-sample", "log-retention-policy"],
+        "refusal_template": "❌ HIPAA §164.312(b) — PHI route at {file}:{line} does not emit an audit event. Trust is built by saying no. Proposed fix: invoke `audit.log({ actor, action, resource, outcome })` before returning.",
+        "auditor_questions": [
+          "What activity is logged for ePHI access, modification, and deletion?",
+          "What is the log retention period?",
+          "How are audit logs themselves protected from tampering?"
+        ],
+        "hhs_source": "techsafeguards.pdf",
+        "nprm_2024_status": "remains_required_with_clarification"
+      }
+    },
+    {
+      "control_id": "164.312(c)(1)",
+      "control_name": "Integrity",
+      "family": "Technical Safeguards",
+      "description": "Implement policies and procedures to protect electronic protected health information from improper alteration or destruction.",
+      "keywords": ["integrity", "data integrity", "alteration prevention", "data destruction prevention"],
+      "bobguard": {
+        "severity": "warn",
+        "code_patterns": [
+          { "lang": "ts", "kind": "regex", "match": "prisma\\.\\w+\\.delete\\s*\\(", "comment": "Hard delete of records — review for ePHI" }
+        ],
+        "fix_template": "templates/fixes/soft-delete-with-tombstone.ts",
+        "evidence_artifacts": ["control-mapping", "tombstone-policy"],
+        "refusal_template": "⚠️ HIPAA §164.312(c)(1) — hard-delete on {file}:{line} risks ePHI integrity. Proposed fix: switch to soft-delete with tombstone + integrity hash.",
+        "auditor_questions": ["How are ePHI records protected from improper alteration or destruction?"],
+        "hhs_source": "techsafeguards.pdf",
+        "nprm_2024_status": "remains_required"
+      }
+    },
+    {
+      "control_id": "164.312(c)(2)",
+      "control_name": "Mechanism to Authenticate Electronic Protected Health Information (Addressable)",
+      "family": "Technical Safeguards",
+      "description": "Implement electronic mechanisms to corroborate that electronic protected health information has not been altered or destroyed in an unauthorized manner.",
+      "keywords": ["data authentication", "integrity verification", "checksum", "digital signature", "hash verification", "data validation"],
+      "bobguard": {
+        "severity": "warn",
+        "code_patterns": [],
+        "fix_template": "templates/fixes/integrity-hash.ts",
+        "evidence_artifacts": ["control-mapping", "integrity-hash-policy"],
+        "refusal_template": "⚠️ HIPAA §164.312(c)(2) — integrity verification not detected for ePHI store at {file}. Proposed fix: store SHA-256 hash alongside record; verify on read.",
+        "auditor_questions": ["How is the integrity of ePHI verified at rest?"],
+        "hhs_source": "techsafeguards.pdf",
+        "nprm_2024_status": "would_become_required"
+      }
+    },
+    {
+      "control_id": "164.312(d)",
+      "control_name": "Person or Entity Authentication",
+      "family": "Technical Safeguards",
+      "description": "Implement procedures to verify that a person or entity seeking access to electronic protected health information is the one claimed.",
+      "keywords": ["authentication", "identity verification", "multi-factor authentication", "biometrics", "password", "PIN", "smart card"],
+      "bobguard": {
+        "severity": "block",
+        "code_patterns": [
+          { "lang": "ts", "kind": "regex", "match": "passport\\.use\\(.*LocalStrategy(?![^)]*mfa)", "comment": "Single-factor local auth strategy" },
+          { "lang": "ts", "kind": "regex", "match": "bcrypt\\.compare\\([^)]*\\)\\s*&&\\s*(?!.*mfa|.*totp|.*webauthn)", "comment": "Password compare without MFA gate" }
+        ],
+        "fix_template": "templates/fixes/add-mfa.ts",
+        "evidence_artifacts": ["control-mapping", "mfa-coverage-report"],
+        "refusal_template": "❌ HIPAA §164.312(d) — authentication at {file}:{line} is single-factor for an ePHI-bearing system. Trust is built by saying no. Proposed fix: gate with TOTP/WebAuthn MFA. Forward-compat: the 2024 NPRM proposes explicit MFA requirement; BobGuard enforces it now.",
+        "auditor_questions": [
+          "What authentication factors are used for ePHI access?",
+          "Is MFA required for all users with ePHI access?"
+        ],
+        "hhs_source": "techsafeguards.pdf",
+        "nprm_2024_status": "would_explicitly_require_MFA"
+      }
+    },
+    {
+      "control_id": "164.312(e)(1)",
+      "control_name": "Transmission Security",
+      "family": "Technical Safeguards",
+      "description": "Implement technical security measures to guard against unauthorized access to electronic protected health information that is being transmitted over an electronic communications network.",
+      "keywords": ["transmission security", "data in transit", "network security", "secure transmission", "TLS", "SSL"],
+      "bobguard": {
+        "severity": "block",
+        "code_patterns": [
+          { "lang": "ts", "kind": "regex", "match": "https?://(?!localhost)[^/'\"]*\\b(api|service|partner)\\b[^'\"]*['\"]", "comment": "Outbound URL — verify HTTPS and not bare HTTP" },
+          { "lang": "ts", "kind": "regex", "match": "fetch\\s*\\(\\s*['\"]http://(?!localhost)", "comment": "Plain HTTP fetch outbound" },
+          { "lang": "ts", "kind": "regex", "match": "createServer\\((?!.*\\bhttps\\b)", "comment": "HTTP server (not HTTPS) for ePHI service" }
+        ],
+        "fix_template": "templates/fixes/tls-enforcement.ts",
+        "evidence_artifacts": ["control-mapping", "tls-config", "cert-rotation-evidence"],
+        "refusal_template": "❌ HIPAA §164.312(e)(1) — ePHI transmitted over plain HTTP at {file}:{line}. Trust is built by saying no. Proposed fix: enforce HTTPS/TLS 1.2+ on this transport.",
+        "auditor_questions": ["How is ePHI protected during transmission?"],
+        "hhs_source": "techsafeguards.pdf",
+        "nprm_2024_status": "remains_required_with_clarification"
+      }
+    },
+    {
+      "control_id": "164.312(e)(2)(i)",
+      "control_name": "Integrity Controls (Addressable)",
+      "family": "Technical Safeguards",
+      "description": "Implement security measures to ensure that electronically transmitted electronic protected health information is not improperly modified without detection until disposed of.",
+      "keywords": ["transmission integrity", "message integrity", "data integrity in transit", "MAC", "integrity controls"],
+      "bobguard": {
+        "severity": "warn",
+        "code_patterns": [],
+        "fix_template": "templates/fixes/message-integrity.ts",
+        "evidence_artifacts": ["control-mapping"],
+        "refusal_template": "⚠️ HIPAA §164.312(e)(2)(i) — outbound message at {file} lacks a message authentication code. Proposed fix: sign payload with HMAC-SHA256.",
+        "auditor_questions": ["How is the integrity of ePHI verified during transmission?"],
+        "hhs_source": "techsafeguards.pdf",
+        "nprm_2024_status": "would_become_required"
+      }
+    },
+    {
+      "control_id": "164.312(e)(2)(ii)",
+      "control_name": "Encryption (Addressable, Transmission)",
+      "family": "Technical Safeguards",
+      "description": "Implement a mechanism to encrypt electronic protected health information whenever deemed appropriate.",
+      "keywords": ["transmission encryption", "encryption in transit", "network encryption", "TLS", "VPN"],
+      "bobguard": {
+        "severity": "block",
+        "code_patterns": [
+          { "lang": "ts", "kind": "regex", "match": "createServer\\(\\s*(?!\\{[^}]*key)", "comment": "Server created without TLS key/cert" },
+          { "lang": "ts", "kind": "regex", "match": "tls\\.createSecureContext\\([^)]*minVersion:\\s*['\"]TLSv1(\\.0|\\.1)?['\"]", "comment": "TLS minVersion < 1.2" }
+        ],
+        "fix_template": "templates/fixes/tls-min-1-2.ts",
+        "evidence_artifacts": ["control-mapping", "tls-config"],
+        "refusal_template": "❌ HIPAA §164.312(e)(2)(ii) — ePHI in transit uses TLS < 1.2 or no TLS at {file}:{line}. Trust is built by saying no. Proposed fix: enforce `minVersion: 'TLSv1.2'` (TLS 1.3 preferred).",
+        "auditor_questions": ["What TLS configuration protects ePHI in transit?"],
+        "hhs_source": "techsafeguards.pdf",
+        "nprm_2024_status": "would_become_required"
+      }
+    }
+  ]
+}

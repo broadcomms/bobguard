@@ -1,0 +1,97 @@
+{
+  "_meta": {
+    "name": "HIPAA Security Rule 2024 NPRM Forward-Compatibility Overlay",
+    "schema_version": "1.0.0",
+    "purpose": "Flags BobGuard-enforced controls whose strictness anticipates the proposed 2024 HIPAA Security Rule NPRM, so a regulated entity adopting BobGuard today is forward-compatible with the proposed rule.",
+    "source": "HHS OCR, Notice of Proposed Rulemaking, 'HIPAA Security Rule To Strengthen the Cybersecurity of Electronic Protected Health Information,' RIN 0945-AA22, 90 Fed. Reg. 898 (Jan. 6, 2025).",
+    "source_local": "compliance/references/hhs/2024-30983.pdf",
+    "framing_disclaimer": "The 2024 NPRM is a PROPOSED rule, not law. BobGuard refusal language uses 'proposes' / 'would' phrasing and never asserts an existing legal obligation under the proposed text. If the final rule departs from these proposals, this overlay must be updated.",
+    "compliance_window": "180 days after the effective date of any final rule (per 45 CFR 160.105 standard compliance period).",
+    "applies_on_top_of": "compliance/controls/hipaa.json (existing AuditGuardX catalog, 98 controls)"
+  },
+  "proposed_changes": [
+    {
+      "change_id": "NPRM-001",
+      "title": "Removal of the addressable / required distinction",
+      "summary": "The NPRM proposes to remove the distinction between addressable and required implementation specifications. Most existing addressable specifications would become required.",
+      "affects_controls": [
+        "164.312(a)(2)(iii)",
+        "164.312(a)(2)(iv)",
+        "164.312(c)(2)",
+        "164.312(e)(2)(i)",
+        "164.312(e)(2)(ii)"
+      ],
+      "bobguard_action": "BobGuard treats all listed controls as required by default. The refusal language always offers a 'forward-compat' note when an existing addressable spec is being enforced.",
+      "nprm_reference_section": "Preamble, II.B. (Major Provisions)"
+    },
+    {
+      "change_id": "NPRM-002",
+      "title": "Explicit Multi-Factor Authentication (MFA) requirement",
+      "summary": "The NPRM proposes to add an explicit MFA requirement and a defined term for 'Multi-factor Authentication.'",
+      "affects_controls": ["164.312(d)"],
+      "bobguard_action": "BobGuard's pattern set under 164.312(d) flags single-factor authentication on ePHI-bearing systems with `severity: block`.",
+      "nprm_reference_section": "Preamble, II.B.10–11 (Definitions)"
+    },
+    {
+      "change_id": "NPRM-003",
+      "title": "Encryption of ePHI: addressable → required",
+      "summary": "The NPRM proposes to expressly require encryption of ePHI at rest and in transit, with limited exceptions, eliminating the existing per-entity reasonableness analysis.",
+      "affects_controls": ["164.312(a)(2)(iv)", "164.312(e)(2)(ii)"],
+      "bobguard_action": "BobGuard's encryption-at-rest and TLS controls are `severity: block` regardless of the addressable status under the existing rule.",
+      "nprm_reference_section": "Preamble, II.B.; §164.312(a)(2)(iv); §164.312(e)(2)(ii)"
+    },
+    {
+      "change_id": "NPRM-004",
+      "title": "Technology Asset Inventory + ePHI mapping",
+      "summary": "The NPRM proposes a new standard requiring regulated entities to maintain a technology asset inventory and a network/data-flow map showing where ePHI is created, received, maintained, or transmitted.",
+      "affects_controls": ["164.308(a)(1)(i)"],
+      "bobguard_action": "BobGuard's `data-flow-tracer` skill outputs a Mermaid network/ePHI-flow map per PR; the auditor PDF includes a Technology Asset Inventory section auto-built from the repo's package manifests and infrastructure code.",
+      "nprm_reference_section": "Preamble, II.D.; §164.308(a)(1)(i)"
+    },
+    {
+      "change_id": "NPRM-005",
+      "title": "Network segmentation",
+      "summary": "The NPRM proposes an explicit implementation specification for network segmentation to limit lateral movement.",
+      "affects_controls": ["164.312(a)(1)"],
+      "bobguard_action": "BobGuard inspects infrastructure-as-code (Terraform / Helm / K8s manifests) for missing NetworkPolicies or unsegmented VPCs and emits a `severity: warn` finding.",
+      "nprm_reference_section": "Preamble, II.F.; proposed §164.312"
+    },
+    {
+      "change_id": "NPRM-006",
+      "title": "Vulnerability scanning and penetration testing",
+      "summary": "The NPRM proposes explicit requirements for vulnerability scans (every 6 months proposed) and penetration testing (annual proposed).",
+      "affects_controls": ["164.308(a)(8)"],
+      "bobguard_action": "BobGuard checks for the presence of CI workflow files invoking SAST/DAST and a documented pen-test policy in `compliance/policies/`.",
+      "nprm_reference_section": "Preamble, II.D.; proposed §164.308(a)(8)"
+    },
+    {
+      "change_id": "NPRM-007",
+      "title": "Critical-system restoration within 72 hours",
+      "summary": "The NPRM seeks comment on requiring restoration of critical relevant electronic information systems and data within 72 hours.",
+      "affects_controls": ["164.308(a)(7)"],
+      "bobguard_action": "BobGuard inspects the contingency plan markdown in `compliance/policies/contingency-plan.md` for explicit recovery time objective (RTO) ≤ 72h.",
+      "nprm_reference_section": "Preamble, II.D.; proposed §164.308(a)(7)"
+    },
+    {
+      "change_id": "NPRM-008",
+      "title": "Risk analysis remediation timing",
+      "summary": "The NPRM proposes that regulated entities implement security measures in a timely manner to address risks identified in their risk analysis, in accordance with priorities established under §164.308(a)(5)(ii)(C).",
+      "affects_controls": ["164.308(a)(5)(ii)(D)"],
+      "bobguard_action": "BobGuard cross-references PR diffs against the latest `risk-analysis.json` and surfaces controls associated with high-priority risks not yet remediated.",
+      "nprm_reference_section": "Preamble, II.D.; §164.308(a)(5)(ii)(D)"
+    },
+    {
+      "change_id": "NPRM-RFI-AI",
+      "title": "Request for Information: Artificial Intelligence and ePHI",
+      "summary": "The NPRM contains a Request for Information on the role of AI in protecting ePHI and the security risks AI may introduce.",
+      "affects_controls": [],
+      "bobguard_action": "BobGuard emits a watsonx.governance entry per PR documenting the AI-assisted code generation provenance — directly responsive to the RFI's stated concerns about AI-generated code in regulated environments.",
+      "nprm_reference_section": "Preamble, IV.K.2."
+    }
+  ],
+  "demo_callout": {
+    "use_in_pdf_cover": true,
+    "tagline": "Forward-compatible with the 2024 HIPAA Security Rule NPRM (proposed Jan 6, 2025).",
+    "tagline_long": "BobGuard's enforcement defaults to the stricter standards proposed in the HHS OCR Notice of Proposed Rulemaking 'HIPAA Security Rule To Strengthen the Cybersecurity of Electronic Protected Health Information' (RIN 0945-AA22, Jan. 6, 2025). A regulated entity adopting BobGuard today is positioned for compliance with the proposed rule's 180-day window."
+  }
+}

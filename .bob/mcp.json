@@ -1,0 +1,30 @@
+{
+  "$schema": "https://bob.ibm.com/schemas/mcp.json",
+  "mcpServers": {
+    "bob-guard": {
+      "command": "node",
+      "args": ["./mcp/bob-guard/dist/server.js"],
+      "env": {
+        "WATSONX_GOVERNANCE_KEY": "${env:WATSONX_GOVERNANCE_KEY}",
+        "WATSONX_GOVERNANCE_URL": "${env:WATSONX_GOVERNANCE_URL}",
+        "WATSONX_AI_KEY": "${env:WATSONX_AI_KEY}",
+        "WATSONX_AI_PROJECT_ID": "${env:WATSONX_AI_PROJECT_ID}",
+        "WATSONX_AI_MODEL": "ibm/granite-3-8b-instruct",
+        "BOBGUARD_CONTROLS_DIR": "./compliance/controls",
+        "BOBGUARD_EVIDENCE_DIR": "./compliance/evidence",
+        "BOBGUARD_TEMPLATES_DIR": "./mcp/bob-guard/templates",
+        "BOBGUARD_HHS_REFS_DIR": "./compliance/references/hhs",
+        "BOBGUARD_GOVERNANCE_MODE": "live"
+      },
+      "description": "BobGuard custom MCP. Tools: controls.lookup, controls.scan, evidence.render_pdf, governance.register_pr, nprm.forward_compat_check. Built inside Bob in Plan→Code mode (see bob_sessions/03-mcp-build.md)."
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${env:GITHUB_PERSONAL_ACCESS_TOKEN}"
+      },
+      "description": "GitHub MCP for PR creation, comments, and reviews."
+    }
+  }
+}

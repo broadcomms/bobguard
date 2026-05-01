@@ -1,0 +1,44 @@
+# .bobignore — paths Bob should NOT auto-load into conversation context.
+# Reference these explicitly with @path/to/file when needed.
+
+# Dependencies
+node_modules/
+.yarn/
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.turbo/
+coverage/
+
+# Large reference PDFs — reference explicitly via @ when needed (token-budget hygiene; Session 01)
+compliance/references/hhs/*.pdf
+
+# Bob's own session exports — would recurse if loaded
+bob_sessions/
+
+# Auto-generated evidence renders (working dir)
+compliance/evidence/PR-tmp-*/
+mcp/bob-guard/renders/
+
+# Database + logs
+*.db
+*.sqlite
+postgres-data/
+*.log
+
+# Lockfiles (Bob doesn't need to read these)
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Generated diagrams (raw renders)
+*.tmp.png
+*.tmp.pdf
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/

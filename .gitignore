@@ -1,0 +1,66 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+.yarn/
+
+# Build outputs
+dist/
+build/
+out/
+*.tsbuildinfo
+.next/
+.turbo/
+
+# Test + coverage
+coverage/
+*.lcov
+.nyc_output/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment + secrets — NEVER commit (BobGuard's own §164.312(a)(2)(iv) check)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+*.key
+*.crt
+secrets/
+.aws/
+
+# Database
+*.db
+*.sqlite
+postgres-data/
+prisma/migrations/dev/
+
+# Editor + OS
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Auto-generated evidence (working dir; committed example only)
+compliance/evidence/PR-tmp-*/
+compliance/evidence/.cache/
+
+# Bob runtime artifacts (we commit .bob/ config, but not runtime caches)
+.bob/cache/
+.bob/runtime/
+
+# PDF render cache
+mcp/bob-guard/renders/
+*.tmp.pdf
+
+PHASE-NOTES.md

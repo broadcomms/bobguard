@@ -1,0 +1,688 @@
+[
+  {
+    "control_id": "164.308(a)(1)",
+    "control_name": "Security Management Process",
+    "family": "Administrative Safeguards",
+    "description": "Implement policies and procedures to prevent, detect, contain, and correct security violations.",
+    "keywords": ["security management", "risk analysis", "risk management", "sanction policy", "security violations", "security program"]
+  },
+  {
+    "control_id": "164.308(a)(1)(ii)(A)",
+    "control_name": "Risk Analysis (Required)",
+    "family": "Administrative Safeguards",
+    "description": "Conduct an accurate and thorough assessment of the potential risks and vulnerabilities to the confidentiality, integrity, and availability of electronic protected health information held by the covered entity.",
+    "keywords": ["risk analysis", "risk assessment", "vulnerabilities", "confidentiality", "integrity", "availability", "EPHI", "threat assessment"]
+  },
+  {
+    "control_id": "164.308(a)(1)(ii)(B)",
+    "control_name": "Risk Management (Required)",
+    "family": "Administrative Safeguards",
+    "description": "Implement security measures sufficient to reduce risks and vulnerabilities to a reasonable and appropriate level to comply with the general requirements of the Security Rule.",
+    "keywords": ["risk management", "risk mitigation", "security measures", "risk reduction", "safeguards"]
+  },
+  {
+    "control_id": "164.308(a)(1)(ii)(C)",
+    "control_name": "Sanction Policy (Required)",
+    "family": "Administrative Safeguards",
+    "description": "Apply appropriate sanctions against workforce members who fail to comply with the security policies and procedures of the covered entity.",
+    "keywords": ["sanction policy", "disciplinary action", "workforce compliance", "policy enforcement", "noncompliance", "termination"]
+  },
+  {
+    "control_id": "164.308(a)(1)(ii)(D)",
+    "control_name": "Information System Activity Review (Required)",
+    "family": "Administrative Safeguards",
+    "description": "Implement procedures to regularly review records of information system activity, such as audit logs, access reports, and security incident tracking reports.",
+    "keywords": ["activity review", "audit logs", "access reports", "security incident tracking", "monitoring", "system activity"]
+  },
+  {
+    "control_id": "164.308(a)(2)",
+    "control_name": "Assigned Security Responsibility",
+    "family": "Administrative Safeguards",
+    "description": "Identify the security official who is responsible for the development and implementation of the policies and procedures required by the Security Rule for the entity.",
+    "keywords": ["security official", "security officer", "CISO", "security responsibility", "designated security person", "privacy official"]
+  },
+  {
+    "control_id": "164.308(a)(3)",
+    "control_name": "Workforce Security",
+    "family": "Administrative Safeguards",
+    "description": "Implement policies and procedures to ensure that all members of its workforce have appropriate access to electronic protected health information, and to prevent those workforce members who do not have access from obtaining access to electronic protected health information.",
+    "keywords": ["workforce security", "access control", "workforce access", "minimum necessary", "authorization", "employee access"]
+  },
+  {
+    "control_id": "164.308(a)(3)(ii)(A)",
+    "control_name": "Authorization and/or Supervision (Addressable)",
+    "family": "Administrative Safeguards",
+    "description": "Implement procedures for the authorization and/or supervision of workforce members who work with electronic protected health information or in locations where it might be accessed.",
+    "keywords": ["authorization", "supervision", "workforce authorization", "access authorization", "job function", "role-based access"]
+  },
+  {
+    "control_id": "164.308(a)(3)(ii)(B)",
+    "control_name": "Workforce Clearance Procedure (Addressable)",
+    "family": "Administrative Safeguards",
+    "description": "Implement procedures to determine that the access of a workforce member to electronic protected health information is appropriate.",
+    "keywords": ["workforce clearance", "background check", "access verification", "clearance procedure", "screening"]
+  },
+  {
+    "control_id": "164.308(a)(3)(ii)(C)",
+    "control_name": "Termination Procedures (Addressable)",
+    "family": "Administrative Safeguards",
+    "description": "Implement procedures for terminating access to electronic protected health information when the employment of a workforce member ends or as required by determinations made as specified in the Workforce Clearance Procedure.",
+    "keywords": ["termination procedures", "access termination", "employee offboarding", "revoke access", "deprovisioning"]
+  },
+  {
+    "control_id": "164.308(a)(4)",
+    "control_name": "Information Access Management",
+    "family": "Administrative Safeguards",
+    "description": "Implement policies and procedures for authorizing access to electronic protected health information that are consistent with the applicable requirements of the Privacy Rule.",
+    "keywords": ["information access management", "access authorization", "access control", "minimum necessary", "privacy rule", "access policies"]
+  },
+  {
+    "control_id": "164.308(a)(4)(ii)(A)",
+    "control_name": "Isolating Health Care Clearinghouse Functions (Required)",
+    "family": "Administrative Safeguards",
+    "description": "If a health care clearinghouse is part of a larger organization, the clearinghouse must implement policies and procedures that protect the electronic protected health information of the clearinghouse from unauthorized access by the larger organization.",
+    "keywords": ["clearinghouse", "isolation", "separation of duties", "unauthorized access", "organizational separation"]
+  },
+  {
+    "control_id": "164.308(a)(4)(ii)(B)",
+    "control_name": "Access Authorization (Addressable)",
+    "family": "Administrative Safeguards",
+    "description": "Implement policies and procedures for granting access to electronic protected health information, for example, through access to a workstation, transaction, program, process, or other mechanism.",
+    "keywords": ["access authorization", "granting access", "access privileges", "role-based access", "access rights"]
+  },
+  {
+    "control_id": "164.308(a)(4)(ii)(C)",
+    "control_name": "Access Establishment and Modification (Addressable)",
+    "family": "Administrative Safeguards",
+    "description": "Implement policies and procedures that, based upon the entity's access authorization policies, establish, document, review, and modify a user's right of access to a workstation, transaction, program, or process.",
+    "keywords": ["access establishment", "access modification", "user provisioning", "access review", "access rights management"]
+  },
+  {
+    "control_id": "164.308(a)(5)",
+    "control_name": "Security Awareness and Training",
+    "family": "Administrative Safeguards",
+    "description": "Implement a security awareness and training program for all members of its workforce (including management).",
+    "keywords": ["security awareness", "security training", "workforce training", "employee training", "security education", "training program"]
+  },
+  {
+    "control_id": "164.308(a)(5)(ii)(A)",
+    "control_name": "Security Reminders (Addressable)",
+    "family": "Administrative Safeguards",
+    "description": "Implement periodic security updates and reminders to the workforce.",
+    "keywords": ["security reminders", "security updates", "periodic reminders", "awareness communications", "security bulletins"]
+  },
+  {
+    "control_id": "164.308(a)(5)(ii)(B)",
+    "control_name": "Protection from Malicious Software (Addressable)",
+    "family": "Administrative Safeguards",
+    "description": "Implement procedures for guarding against, detecting, and reporting malicious software.",
+    "keywords": ["malicious software", "malware", "antivirus", "virus protection", "trojan", "worm", "ransomware", "anti-malware"]
+  },
+  {
+    "control_id": "164.308(a)(5)(ii)(C)",
+    "control_name": "Log-in Monitoring (Addressable)",
+    "family": "Administrative Safeguards",
+    "description": "Implement procedures for monitoring log-in attempts and reporting discrepancies.",
+    "keywords": ["log-in monitoring", "login attempts", "failed login", "authentication monitoring", "access monitoring", "brute force"]
+  },
+  {
+    "control_id": "164.308(a)(5)(ii)(D)",
+    "control_name": "Password Management (Addressable)",
+    "family": "Administrative Safeguards",
+    "description": "Implement procedures for creating, changing, and safeguarding passwords.",
+    "keywords": ["password management", "password policy", "password creation", "password change", "password safeguarding", "credential management"]
+  },
+  {
+    "control_id": "164.308(a)(6)",
+    "control_name": "Security Incident Procedures",
+    "family": "Administrative Safeguards",
+    "description": "Implement policies and procedures to address security incidents.",
+    "keywords": ["security incident", "incident response", "incident procedures", "incident management", "security event"]
+  },
+  {
+    "control_id": "164.308(a)(6)(ii)",
+    "control_name": "Response and Reporting (Required)",
+    "family": "Administrative Safeguards",
+    "description": "Identify and respond to suspected or known security incidents; mitigate, to the extent practicable, harmful effects of security incidents that are known to the covered entity; and document security incidents and their outcomes.",
+    "keywords": ["incident response", "incident reporting", "incident mitigation", "incident documentation", "security breach response"]
+  },
+  {
+    "control_id": "164.308(a)(7)",
+    "control_name": "Contingency Plan",
+    "family": "Administrative Safeguards",
+    "description": "Establish (and implement as needed) policies and procedures for responding to an emergency or other occurrence (for example, fire, vandalism, system failure, and natural disaster) that damages systems that contain electronic protected health information.",
+    "keywords": ["contingency plan", "emergency planning", "disaster preparedness", "business continuity", "emergency response"]
+  },
+  {
+    "control_id": "164.308(a)(7)(ii)(A)",
+    "control_name": "Data Backup Plan (Required)",
+    "family": "Administrative Safeguards",
+    "description": "Establish and implement procedures to create and maintain retrievable exact copies of electronic protected health information.",
+    "keywords": ["data backup", "backup plan", "data copies", "backup procedures", "data recovery", "backup storage"]
+  },
+  {
+    "control_id": "164.308(a)(7)(ii)(B)",
+    "control_name": "Disaster Recovery Plan (Required)",
+    "family": "Administrative Safeguards",
+    "description": "Establish (and implement as needed) procedures to restore any loss of data.",
+    "keywords": ["disaster recovery", "data restoration", "recovery plan", "disaster recovery plan", "data loss recovery"]
+  },
+  {
+    "control_id": "164.308(a)(7)(ii)(C)",
+    "control_name": "Emergency Mode Operation Plan (Required)",
+    "family": "Administrative Safeguards",
+    "description": "Establish (and implement as needed) procedures to enable continuation of critical business processes for protection of the security of electronic protected health information while operating in emergency mode.",
+    "keywords": ["emergency mode", "emergency operations", "business continuity", "critical business processes", "emergency security"]
+  },
+  {
+    "control_id": "164.308(a)(7)(ii)(D)",
+    "control_name": "Testing and Revision Procedures (Addressable)",
+    "family": "Administrative Safeguards",
+    "description": "Implement procedures for periodic testing and revision of contingency plans.",
+    "keywords": ["testing", "revision", "contingency testing", "plan testing", "disaster recovery testing", "tabletop exercise"]
+  },
+  {
+    "control_id": "164.308(a)(7)(ii)(E)",
+    "control_name": "Applications and Data Criticality Analysis (Addressable)",
+    "family": "Administrative Safeguards",
+    "description": "Assess the relative criticality of specific applications and data in support of other contingency plan components.",
+    "keywords": ["criticality analysis", "application criticality", "data criticality", "business impact analysis", "prioritization"]
+  },
+  {
+    "control_id": "164.308(a)(8)",
+    "control_name": "Evaluation",
+    "family": "Administrative Safeguards",
+    "description": "Perform a periodic technical and nontechnical evaluation, based initially upon the standards implemented under this rule and subsequently, in response to environmental or operations changes affecting the security of electronic protected health information, that establishes the extent to which an entity's security policies and procedures meet the requirements of the Security Rule.",
+    "keywords": ["evaluation", "security evaluation", "periodic assessment", "compliance evaluation", "security audit", "technical evaluation", "nontechnical evaluation"]
+  },
+  {
+    "control_id": "164.308(b)(1)",
+    "control_name": "Business Associate Contracts and Other Arrangements",
+    "family": "Administrative Safeguards",
+    "description": "A covered entity may permit a business associate to create, receive, maintain, or transmit electronic protected health information on the covered entity's behalf only if the covered entity obtains satisfactory assurances that the business associate will appropriately safeguard the information.",
+    "keywords": ["business associate", "business associate contract", "BAA", "third party", "vendor management", "satisfactory assurances"]
+  },
+  {
+    "control_id": "164.308(b)(4)",
+    "control_name": "Written Contract or Other Arrangement (Required)",
+    "family": "Administrative Safeguards",
+    "description": "Document the satisfactory assurances required by the Business Associate Contracts and Other Arrangements standard through a written contract or other arrangement with the business associate that meets the applicable requirements of the Organizational Requirements.",
+    "keywords": ["written contract", "business associate agreement", "BAA", "contract documentation", "vendor agreement"]
+  },
+  {
+    "control_id": "164.310(a)(1)",
+    "control_name": "Facility Access Controls",
+    "family": "Physical Safeguards",
+    "description": "Implement policies and procedures to limit physical access to its electronic information systems and the facility or facilities in which they are housed, while ensuring that properly authorized access is allowed.",
+    "keywords": ["facility access", "physical access control", "building security", "facility security", "physical security"]
+  },
+  {
+    "control_id": "164.310(a)(2)(i)",
+    "control_name": "Contingency Operations (Addressable)",
+    "family": "Physical Safeguards",
+    "description": "Establish (and implement as needed) procedures that allow facility access in support of restoration of lost data under the disaster recovery plan and emergency mode operations plan in the event of an emergency.",
+    "keywords": ["contingency operations", "facility access", "emergency access", "disaster recovery access", "emergency facility access"]
+  },
+  {
+    "control_id": "164.310(a)(2)(ii)",
+    "control_name": "Facility Security Plan (Addressable)",
+    "family": "Physical Safeguards",
+    "description": "Implement policies and procedures to safeguard the facility and the equipment therein from unauthorized physical access, tampering, and theft.",
+    "keywords": ["facility security plan", "physical security plan", "building security", "equipment protection", "theft prevention", "tampering prevention"]
+  },
+  {
+    "control_id": "164.310(a)(2)(iii)",
+    "control_name": "Access Control and Validation Procedures (Addressable)",
+    "family": "Physical Safeguards",
+    "description": "Implement procedures to control and validate a person's access to facilities based on their role or function, including visitor control, and control of access to software programs for testing and revision.",
+    "keywords": ["access validation", "visitor control", "role-based access", "facility access validation", "badge access", "visitor management"]
+  },
+  {
+    "control_id": "164.310(a)(2)(iv)",
+    "control_name": "Maintenance Records (Addressable)",
+    "family": "Physical Safeguards",
+    "description": "Implement policies and procedures to document repairs and modifications to the physical components of a facility which are related to security (for example, hardware, walls, doors, and locks).",
+    "keywords": ["maintenance records", "facility maintenance", "security repairs", "physical security modifications", "maintenance documentation"]
+  },
+  {
+    "control_id": "164.310(b)",
+    "control_name": "Workstation Use",
+    "family": "Physical Safeguards",
+    "description": "Implement policies and procedures that specify the proper functions to be performed, the manner in which those functions are to be performed, and the physical attributes of the surroundings of a specific workstation or class of workstation that can access electronic protected health information.",
+    "keywords": ["workstation use", "workstation policy", "computer use policy", "acceptable use", "workstation environment", "remote workstation"]
+  },
+  {
+    "control_id": "164.310(c)",
+    "control_name": "Workstation Security",
+    "family": "Physical Safeguards",
+    "description": "Implement physical safeguards for all workstations that access electronic protected health information, to restrict access to authorized users.",
+    "keywords": ["workstation security", "physical workstation protection", "workstation access", "device security", "endpoint security"]
+  },
+  {
+    "control_id": "164.310(d)(1)",
+    "control_name": "Device and Media Controls",
+    "family": "Physical Safeguards",
+    "description": "Implement policies and procedures that govern the receipt and removal of hardware and electronic media that contain electronic protected health information, into and out of a facility, and the movement of these items within the facility.",
+    "keywords": ["device controls", "media controls", "hardware management", "electronic media", "asset management", "device tracking"]
+  },
+  {
+    "control_id": "164.310(d)(2)(i)",
+    "control_name": "Disposal (Required)",
+    "family": "Physical Safeguards",
+    "description": "Implement policies and procedures to address the final disposition of electronic protected health information, and/or the hardware or electronic media on which it is stored.",
+    "keywords": ["disposal", "media disposal", "data destruction", "secure disposal", "degaussing", "sanitization", "data wiping"]
+  },
+  {
+    "control_id": "164.310(d)(2)(ii)",
+    "control_name": "Media Re-use (Required)",
+    "family": "Physical Safeguards",
+    "description": "Implement procedures for removal of electronic protected health information from electronic media before the media are made available for re-use.",
+    "keywords": ["media re-use", "data removal", "media sanitization", "data erasure", "media recycling"]
+  },
+  {
+    "control_id": "164.310(d)(2)(iii)",
+    "control_name": "Accountability (Addressable)",
+    "family": "Physical Safeguards",
+    "description": "Maintain a record of the movements of hardware and electronic media and any person responsible therefore.",
+    "keywords": ["accountability", "asset tracking", "media tracking", "hardware tracking", "chain of custody", "device inventory"]
+  },
+  {
+    "control_id": "164.310(d)(2)(iv)",
+    "control_name": "Data Backup and Storage (Addressable)",
+    "family": "Physical Safeguards",
+    "description": "Create a retrievable, exact copy of electronic protected health information, when needed, before movement of equipment.",
+    "keywords": ["data backup", "data storage", "backup before move", "equipment relocation", "data preservation"]
+  },
+  {
+    "control_id": "164.312(a)(1)",
+    "control_name": "Access Control",
+    "family": "Technical Safeguards",
+    "description": "Implement technical policies and procedures for electronic information systems that maintain electronic protected health information to allow access only to those persons or software programs that have been granted access rights as specified in the Information Access Management standard.",
+    "keywords": ["access control", "technical access control", "system access", "access rights", "access privileges", "logical access"]
+  },
+  {
+    "control_id": "164.312(a)(2)(i)",
+    "control_name": "Unique User Identification (Required)",
+    "family": "Technical Safeguards",
+    "description": "Assign a unique name and/or number for identifying and tracking user identity.",
+    "keywords": ["unique user identification", "user ID", "user identity", "user tracking", "unique identifier", "username"]
+  },
+  {
+    "control_id": "164.312(a)(2)(ii)",
+    "control_name": "Emergency Access Procedure (Required)",
+    "family": "Technical Safeguards",
+    "description": "Establish (and implement as needed) procedures for obtaining necessary electronic protected health information during an emergency.",
+    "keywords": ["emergency access", "emergency procedure", "break glass", "emergency EPHI access", "crisis access"]
+  },
+  {
+    "control_id": "164.312(a)(2)(iii)",
+    "control_name": "Automatic Logoff (Addressable)",
+    "family": "Technical Safeguards",
+    "description": "Implement electronic procedures that terminate an electronic session after a predetermined time of inactivity.",
+    "keywords": ["automatic logoff", "session timeout", "inactivity timeout", "auto logout", "idle session", "screen lock"]
+  },
+  {
+    "control_id": "164.312(a)(2)(iv)",
+    "control_name": "Encryption and Decryption (Addressable)",
+    "family": "Technical Safeguards",
+    "description": "Implement a mechanism to encrypt and decrypt electronic protected health information.",
+    "keywords": ["encryption", "decryption", "data encryption", "encryption at rest", "cryptography", "data protection"]
+  },
+  {
+    "control_id": "164.312(b)",
+    "control_name": "Audit Controls",
+    "family": "Technical Safeguards",
+    "description": "Implement hardware, software, and/or procedural mechanisms that record and examine activity in information systems that contain or use electronic protected health information.",
+    "keywords": ["audit controls", "audit logs", "audit trail", "system logging", "activity recording", "audit mechanisms", "SIEM"]
+  },
+  {
+    "control_id": "164.312(c)(1)",
+    "control_name": "Integrity",
+    "family": "Technical Safeguards",
+    "description": "Implement policies and procedures to protect electronic protected health information from improper alteration or destruction.",
+    "keywords": ["integrity", "data integrity", "data protection", "alteration prevention", "data destruction prevention"]
+  },
+  {
+    "control_id": "164.312(c)(2)",
+    "control_name": "Mechanism to Authenticate Electronic Protected Health Information (Addressable)",
+    "family": "Technical Safeguards",
+    "description": "Implement electronic mechanisms to corroborate that electronic protected health information has not been altered or destroyed in an unauthorized manner.",
+    "keywords": ["data authentication", "integrity verification", "checksum", "digital signature", "hash verification", "data validation"]
+  },
+  {
+    "control_id": "164.312(d)",
+    "control_name": "Person or Entity Authentication",
+    "family": "Technical Safeguards",
+    "description": "Implement procedures to verify that a person or entity seeking access to electronic protected health information is the one claimed.",
+    "keywords": ["authentication", "identity verification", "person authentication", "entity authentication", "multi-factor authentication", "biometrics", "password", "PIN", "smart card"]
+  },
+  {
+    "control_id": "164.312(e)(1)",
+    "control_name": "Transmission Security",
+    "family": "Technical Safeguards",
+    "description": "Implement technical security measures to guard against unauthorized access to electronic protected health information that is being transmitted over an electronic communications network.",
+    "keywords": ["transmission security", "data in transit", "network security", "secure transmission", "communications security", "TLS", "SSL"]
+  },
+  {
+    "control_id": "164.312(e)(2)(i)",
+    "control_name": "Integrity Controls (Addressable)",
+    "family": "Technical Safeguards",
+    "description": "Implement security measures to ensure that electronically transmitted electronic protected health information is not improperly modified without detection until disposed of.",
+    "keywords": ["transmission integrity", "message integrity", "data integrity in transit", "message authentication code", "integrity controls"]
+  },
+  {
+    "control_id": "164.312(e)(2)(ii)",
+    "control_name": "Encryption (Addressable)",
+    "family": "Technical Safeguards",
+    "description": "Implement a mechanism to encrypt electronic protected health information whenever deemed appropriate.",
+    "keywords": ["transmission encryption", "encryption in transit", "network encryption", "email encryption", "VPN", "TLS", "secure communications"]
+  },
+  {
+    "control_id": "164.314(a)(1)",
+    "control_name": "Business Associate Contracts or Other Arrangements",
+    "family": "Organizational Requirements",
+    "description": "A covered entity may permit a business associate to create, receive, maintain, or transmit electronic protected health information on the covered entity's behalf only if the covered entity obtains satisfactory assurances, in accordance with the Organizational Requirements, that the business associate will appropriately safeguard the information.",
+    "keywords": ["business associate contract", "BAA", "organizational requirements", "third party assurance", "vendor contracts"]
+  },
+  {
+    "control_id": "164.314(a)(2)(i)",
+    "control_name": "Business Associate Contracts (Required)",
+    "family": "Organizational Requirements",
+    "description": "The contract between a covered entity and a business associate must provide that the business associate will implement appropriate safeguards, ensure subcontractor compliance, report security incidents, and authorize termination for material breach.",
+    "keywords": ["business associate contract terms", "BAA requirements", "subcontractor compliance", "security incident reporting", "contract termination"]
+  },
+  {
+    "control_id": "164.314(a)(2)(ii)",
+    "control_name": "Other Arrangements (Required)",
+    "family": "Organizational Requirements",
+    "description": "When a covered entity and its business associate are both government entities, the covered entity may comply through a memorandum of understanding or if other law contains applicable requirements that accomplish the objectives of the business associate contract provisions.",
+    "keywords": ["other arrangements", "memorandum of understanding", "MOU", "government entities", "alternative arrangements"]
+  },
+  {
+    "control_id": "164.314(b)(1)",
+    "control_name": "Requirements for Group Health Plans",
+    "family": "Organizational Requirements",
+    "description": "A group health plan must ensure that its plan documents require the plan sponsor to reasonably and appropriately safeguard electronic protected health information that it creates, receives, maintains, or transmits on behalf of the group health plan.",
+    "keywords": ["group health plan", "plan sponsor", "plan documents", "health plan requirements", "ERISA"]
+  },
+  {
+    "control_id": "164.314(b)(2)",
+    "control_name": "Group Health Plan Implementation Specifications (Required)",
+    "family": "Organizational Requirements",
+    "description": "Plan documents of the group health plan must require the plan sponsor to implement administrative, physical, and technical safeguards, ensure adequate separation, ensure subcontractor compliance, and report security incidents to the group health plan.",
+    "keywords": ["group health plan safeguards", "plan sponsor requirements", "adequate separation", "plan document provisions"]
+  },
+  {
+    "control_id": "164.316(a)",
+    "control_name": "Policies and Procedures",
+    "family": "Policies & Procedures",
+    "description": "Implement reasonable and appropriate policies and procedures to comply with the standards, implementation specifications, or other requirements of the Security Rule, taking into account the factors specified in the Flexibility of Approach provisions. A covered entity may change its policies and procedures at any time, provided that the changes are documented and implemented in accordance with the Security Rule.",
+    "keywords": ["policies and procedures", "security policies", "policy implementation", "policy management", "compliance policies"]
+  },
+  {
+    "control_id": "164.316(b)(1)",
+    "control_name": "Documentation",
+    "family": "Policies & Procedures",
+    "description": "Maintain the policies and procedures implemented to comply with the Security Rule in written (which may be electronic) form; and if an action, activity, or assessment is required by the Security Rule to be documented, maintain a written (which may be electronic) record of the action, activity, or assessment.",
+    "keywords": ["documentation", "written policies", "electronic documentation", "record keeping", "documentation requirements"]
+  },
+  {
+    "control_id": "164.316(b)(2)(i)",
+    "control_name": "Time Limit (Required)",
+    "family": "Policies & Procedures",
+    "description": "Retain the documentation required by the Documentation standard for 6 years from the date of its creation or the date when it last was in effect, whichever is later.",
+    "keywords": ["time limit", "retention period", "six year retention", "document retention", "records retention"]
+  },
+  {
+    "control_id": "164.316(b)(2)(ii)",
+    "control_name": "Availability (Required)",
+    "family": "Policies & Procedures",
+    "description": "Make documentation available to those persons responsible for implementing the procedures to which the documentation pertains.",
+    "keywords": ["availability", "document availability", "policy access", "documentation access", "policy distribution"]
+  },
+  {
+    "control_id": "164.316(b)(2)(iii)",
+    "control_name": "Updates (Required)",
+    "family": "Policies & Procedures",
+    "description": "Review documentation periodically, and update as needed, in response to environmental or operational changes affecting the security of the electronic protected health information.",
+    "keywords": ["updates", "policy updates", "documentation review", "periodic review", "policy revision", "change management"]
+  },
+  {
+    "control_id": "164.502",
+    "control_name": "Uses and Disclosures of Protected Health Information: General Rules",
+    "family": "Privacy Rule - Use & Disclosure",
+    "description": "A covered entity or business associate may not use or disclose protected health information, except as permitted or required by the Privacy Rule. Establishes the general principle that PHI may be used and disclosed only for treatment, payment, and health care operations, or with individual authorization, or as otherwise permitted.",
+    "keywords": ["use and disclosure", "permitted uses", "PHI disclosure", "treatment payment operations", "TPO", "general rules"]
+  },
+  {
+    "control_id": "164.502(b)",
+    "control_name": "Minimum Necessary",
+    "family": "Privacy Rule - Use & Disclosure",
+    "description": "When using or disclosing protected health information or when requesting protected health information from another covered entity or business associate, a covered entity or business associate must make reasonable efforts to limit protected health information to the minimum necessary to accomplish the intended purpose of the use, disclosure, or request.",
+    "keywords": ["minimum necessary", "data minimization", "need to know", "limited disclosure", "proportionality"]
+  },
+  {
+    "control_id": "164.502(e)",
+    "control_name": "Disclosures to Business Associates",
+    "family": "Privacy Rule - Use & Disclosure",
+    "description": "A covered entity may disclose protected health information to a business associate and may allow a business associate to create, receive, maintain, or transmit protected health information on its behalf, only if the covered entity obtains satisfactory assurances that the business associate will appropriately safeguard the information through a written business associate contract or other arrangement.",
+    "keywords": ["business associate disclosure", "BAA", "business associate agreement", "third party disclosure", "vendor PHI access"]
+  },
+  {
+    "control_id": "164.504(e)",
+    "control_name": "Business Associate Contracts",
+    "family": "Privacy Rule - Use & Disclosure",
+    "description": "The contract between the covered entity and business associate must establish the permitted and required uses and disclosures of protected health information by the business associate, provide that the business associate will not use or further disclose the information other than as permitted, and require the business associate to use appropriate safeguards.",
+    "keywords": ["business associate contract", "BAA terms", "permitted uses", "required safeguards", "subcontractor obligations"]
+  },
+  {
+    "control_id": "164.506",
+    "control_name": "Uses and Disclosures for Treatment, Payment, and Health Care Operations",
+    "family": "Privacy Rule - Use & Disclosure",
+    "description": "A covered entity may use or disclose protected health information for its own treatment, payment, or health care operations without individual authorization. A covered entity may disclose PHI for the treatment activities of any health care provider, and may disclose to another covered entity for certain payment and health care operations purposes.",
+    "keywords": ["treatment", "payment", "health care operations", "TPO", "permitted disclosure", "provider disclosure"]
+  },
+  {
+    "control_id": "164.508",
+    "control_name": "Uses and Disclosures for Which an Authorization Is Required",
+    "family": "Privacy Rule - Use & Disclosure",
+    "description": "Except as otherwise permitted or required, a covered entity may not use or disclose protected health information without an authorization that is valid under this section. Authorizations are required for uses and disclosures of psychotherapy notes, marketing, and sale of PHI, among others.",
+    "keywords": ["authorization", "patient authorization", "written authorization", "psychotherapy notes", "marketing", "sale of PHI", "valid authorization"]
+  },
+  {
+    "control_id": "164.510",
+    "control_name": "Uses and Disclosures Requiring an Opportunity for the Individual to Agree or Object",
+    "family": "Privacy Rule - Use & Disclosure",
+    "description": "A covered entity may use or disclose protected health information for facility directories and to persons involved in the individual's care or payment, provided the individual is given an opportunity to agree or object.",
+    "keywords": ["facility directory", "opportunity to object", "family notification", "disaster relief", "informal permission"]
+  },
+  {
+    "control_id": "164.512",
+    "control_name": "Uses and Disclosures for Which an Authorization or Opportunity to Agree or Object Is Not Required",
+    "family": "Privacy Rule - Use & Disclosure",
+    "description": "A covered entity may use or disclose protected health information without the individual's authorization for specified purposes including public health activities, reporting victims of abuse, health oversight activities, judicial and administrative proceedings, law enforcement purposes, decedents, organ donation, research, serious threats to health or safety, essential government functions, and workers' compensation.",
+    "keywords": ["public health", "law enforcement", "judicial proceedings", "abuse reporting", "health oversight", "research", "coroner", "organ donation", "government functions", "workers compensation"]
+  },
+  {
+    "control_id": "164.514(d)",
+    "control_name": "Minimum Necessary Requirements - Implementation",
+    "family": "Privacy Rule - Use & Disclosure",
+    "description": "For uses, disclosures, and requests of protected health information, a covered entity must identify those persons or classes of persons in its workforce who need access to PHI, identify the categories of PHI to which access is needed, and make reasonable efforts to limit access accordingly. For routine disclosures and requests, standard protocols must be established.",
+    "keywords": ["minimum necessary implementation", "role-based access", "standard protocols", "access categories", "workforce access limits"]
+  },
+  {
+    "control_id": "164.514(a)-(c)",
+    "control_name": "De-identification of Protected Health Information",
+    "family": "Privacy Rule - Use & Disclosure",
+    "description": "Health information that does not identify an individual and for which there is no reasonable basis to believe it can identify an individual is not individually identifiable health information. De-identification may be accomplished through expert determination or safe harbor methods by removing 18 specified identifiers.",
+    "keywords": ["de-identification", "anonymization", "safe harbor", "expert determination", "18 identifiers", "PHI de-identification"]
+  },
+  {
+    "control_id": "164.520",
+    "control_name": "Notice of Privacy Practices",
+    "family": "Privacy Rule - Individual Rights",
+    "description": "A covered entity must provide a notice of its privacy practices. The notice must describe the uses and disclosures of PHI, individual rights, and the covered entity's legal duties. Health care providers with direct treatment relationships must make a good faith effort to obtain written acknowledgment of receipt of the notice.",
+    "keywords": ["notice of privacy practices", "NPP", "privacy notice", "patient notification", "privacy rights notice", "acknowledgment"]
+  },
+  {
+    "control_id": "164.522(a)",
+    "control_name": "Right to Request Restriction of Uses and Disclosures",
+    "family": "Privacy Rule - Individual Rights",
+    "description": "An individual has the right to request that a covered entity restrict uses or disclosures of protected health information for treatment, payment, or health care operations, and disclosures to persons involved in the individual's care. A covered entity is not required to agree to a restriction, except in certain circumstances involving self-pay patients.",
+    "keywords": ["restriction request", "use restriction", "disclosure restriction", "patient rights", "self-pay restriction"]
+  },
+  {
+    "control_id": "164.522(b)",
+    "control_name": "Right to Request Confidential Communications",
+    "family": "Privacy Rule - Individual Rights",
+    "description": "An individual has the right to request to receive communications of protected health information from the covered entity by alternative means or at alternative locations. A health care provider must accommodate reasonable requests, and a health plan must accommodate reasonable requests if the individual states that disclosure could endanger the individual.",
+    "keywords": ["confidential communications", "alternative communications", "alternative location", "communication preference", "privacy request"]
+  },
+  {
+    "control_id": "164.524",
+    "control_name": "Right of Access to Protected Health Information",
+    "family": "Privacy Rule - Individual Rights",
+    "description": "An individual has the right of access to inspect and obtain a copy of protected health information about the individual in a designated record set, for as long as the information is maintained. The covered entity must act on a request no later than 30 days after receipt, and may charge a reasonable, cost-based fee.",
+    "keywords": ["right of access", "patient access", "medical records access", "designated record set", "copy of records", "access request", "30 days"]
+  },
+  {
+    "control_id": "164.526",
+    "control_name": "Right to Amend Protected Health Information",
+    "family": "Privacy Rule - Individual Rights",
+    "description": "An individual has the right to request that a covered entity amend protected health information in a designated record set. The covered entity must act on the request no later than 60 days after receipt. The entity may deny the request if the information was not created by the covered entity, is not part of the designated record set, is not available for inspection, or is accurate and complete.",
+    "keywords": ["right to amend", "amendment request", "record correction", "PHI amendment", "designated record set", "60 days"]
+  },
+  {
+    "control_id": "164.528",
+    "control_name": "Right to an Accounting of Disclosures",
+    "family": "Privacy Rule - Individual Rights",
+    "description": "An individual has the right to receive an accounting of disclosures of protected health information made by a covered entity in the six years prior to the request. The accounting need not include disclosures made for treatment, payment, health care operations, or certain other specified purposes.",
+    "keywords": ["accounting of disclosures", "disclosure tracking", "disclosure log", "disclosure history", "six year accounting"]
+  },
+  {
+    "control_id": "164.530(a)",
+    "control_name": "Personnel Designations - Privacy Official and Contact Person",
+    "family": "Privacy Rule - Administrative",
+    "description": "A covered entity must designate a privacy official who is responsible for the development and implementation of the policies and procedures of the covered entity, and a contact person or office responsible for receiving complaints and providing information about the entity's privacy practices.",
+    "keywords": ["privacy official", "privacy officer", "contact person", "privacy designations", "DPO", "complaints"]
+  },
+  {
+    "control_id": "164.530(b)",
+    "control_name": "Training",
+    "family": "Privacy Rule - Administrative",
+    "description": "A covered entity must train all members of its workforce on the policies and procedures with respect to protected health information as necessary and appropriate for the members of the workforce to carry out their functions. Training must be provided to each new member of the workforce within a reasonable period of time after joining, and when material changes are made to policies or procedures.",
+    "keywords": ["privacy training", "workforce training", "HIPAA training", "new hire training", "privacy awareness", "policy training"]
+  },
+  {
+    "control_id": "164.530(c)",
+    "control_name": "Safeguards",
+    "family": "Privacy Rule - Administrative",
+    "description": "A covered entity must have in place appropriate administrative, technical, and physical safeguards to protect the privacy of protected health information. The covered entity must reasonably safeguard PHI from any intentional or unintentional use or disclosure that is in violation of the Privacy Rule, and must limit incidental uses and disclosures.",
+    "keywords": ["privacy safeguards", "PHI protection", "administrative safeguards", "technical safeguards", "physical safeguards", "incidental disclosure"]
+  },
+  {
+    "control_id": "164.530(d)",
+    "control_name": "Complaints",
+    "family": "Privacy Rule - Administrative",
+    "description": "A covered entity must provide a process for individuals to make complaints concerning the covered entity's policies and procedures or its compliance with such policies and procedures or the requirements of the Privacy Rule.",
+    "keywords": ["complaints", "complaint process", "grievance", "privacy complaint", "patient complaints"]
+  },
+  {
+    "control_id": "164.530(e)",
+    "control_name": "Sanctions",
+    "family": "Privacy Rule - Administrative",
+    "description": "A covered entity must have and apply appropriate sanctions against members of its workforce who fail to comply with the privacy policies and procedures of the covered entity or the requirements of the Privacy Rule.",
+    "keywords": ["sanctions", "privacy sanctions", "disciplinary action", "workforce compliance", "policy enforcement"]
+  },
+  {
+    "control_id": "164.530(f)",
+    "control_name": "Mitigation",
+    "family": "Privacy Rule - Administrative",
+    "description": "A covered entity must mitigate, to the extent practicable, any harmful effect that is known to the covered entity of a use or disclosure of protected health information in violation of its policies and procedures or the Privacy Rule.",
+    "keywords": ["mitigation", "harm reduction", "breach mitigation", "violation mitigation", "corrective action"]
+  },
+  {
+    "control_id": "164.530(g)",
+    "control_name": "Refraining from Intimidating or Retaliatory Acts",
+    "family": "Privacy Rule - Administrative",
+    "description": "A covered entity may not intimidate, threaten, coerce, discriminate against, or take other retaliatory action against any individual for exercising their rights under the Privacy Rule, filing a complaint, testifying, assisting, or participating in an investigation, compliance review, proceeding, or hearing.",
+    "keywords": ["non-retaliation", "non-intimidation", "whistleblower protection", "patient rights protection", "anti-retaliation"]
+  },
+  {
+    "control_id": "164.530(h)",
+    "control_name": "Waiver of Rights",
+    "family": "Privacy Rule - Administrative",
+    "description": "A covered entity may not require individuals to waive their rights under the Privacy Rule as a condition of the provision of treatment, payment, enrollment in a health plan, or eligibility for benefits.",
+    "keywords": ["waiver of rights", "non-waiver", "patient rights", "conditions of treatment", "rights preservation"]
+  },
+  {
+    "control_id": "164.530(i)",
+    "control_name": "Policies and Procedures (Privacy)",
+    "family": "Privacy Rule - Administrative",
+    "description": "A covered entity must implement policies and procedures with respect to protected health information that are designed to comply with the standards, implementation specifications, and other requirements of the Privacy Rule. Policies and procedures must be changed as necessary and appropriate to comply with changes in the law and must be documented.",
+    "keywords": ["privacy policies", "privacy procedures", "policy documentation", "policy changes", "compliance policies"]
+  },
+  {
+    "control_id": "164.530(j)",
+    "control_name": "Documentation (Privacy)",
+    "family": "Privacy Rule - Administrative",
+    "description": "A covered entity must maintain its privacy policies and procedures in written or electronic form and retain documentation for six years from the date of creation or when it was last in effect, whichever is later. Required documentation includes privacy practices notices, designation records, complaint dispositions, and other actions, activities, or designations required by the Privacy Rule.",
+    "keywords": ["privacy documentation", "record retention", "six year retention", "policy documentation", "privacy records"]
+  },
+  {
+    "control_id": "164.400",
+    "control_name": "Breach Notification Rule - Applicability",
+    "family": "Breach Notification",
+    "description": "The breach notification requirements apply to covered entities and their business associates with respect to breaches of unsecured protected health information. A breach is defined as the acquisition, access, use, or disclosure of protected health information in a manner not permitted under the Privacy Rule which compromises the security or privacy of the protected health information.",
+    "keywords": ["breach notification", "applicability", "unsecured PHI", "breach definition", "compromised PHI"]
+  },
+  {
+    "control_id": "164.402",
+    "control_name": "Breach Definition and Exceptions",
+    "family": "Breach Notification",
+    "description": "A breach is the acquisition, access, use, or disclosure of PHI in a manner not permitted which compromises the security or privacy of the PHI, unless the covered entity demonstrates a low probability that the PHI has been compromised based on a risk assessment. Exceptions include unintentional acquisition by workforce members acting in good faith, inadvertent disclosures between authorized persons, and disclosures where the recipient could not reasonably retain the information.",
+    "keywords": ["breach definition", "breach exceptions", "risk assessment", "low probability", "unintentional acquisition", "inadvertent disclosure", "good faith"]
+  },
+  {
+    "control_id": "164.404",
+    "control_name": "Notification to Individuals",
+    "family": "Breach Notification",
+    "description": "A covered entity must notify each individual whose unsecured protected health information has been, or is reasonably believed to have been, accessed, acquired, used, or disclosed as a result of a breach. Notification must be provided without unreasonable delay and in no case later than 60 calendar days from discovery of the breach. The notification must include a description of the breach, types of information involved, steps individuals should take, what the entity is doing, and contact procedures.",
+    "keywords": ["individual notification", "breach notification to individuals", "60 days", "notification content", "breach discovery", "patient notification"]
+  },
+  {
+    "control_id": "164.406",
+    "control_name": "Notification to the Media",
+    "family": "Breach Notification",
+    "description": "For breaches involving more than 500 residents of a State or jurisdiction, a covered entity must provide notice to prominent media outlets serving the State or jurisdiction without unreasonable delay and in no case later than 60 calendar days from discovery of the breach.",
+    "keywords": ["media notification", "500 individuals", "state notification", "prominent media", "large breach notification", "press notification"]
+  },
+  {
+    "control_id": "164.408",
+    "control_name": "Notification to the Secretary of HHS",
+    "family": "Breach Notification",
+    "description": "A covered entity must notify the Secretary of HHS of breaches of unsecured protected health information. For breaches involving 500 or more individuals, notification must be provided without unreasonable delay and in no case later than 60 days from discovery. For breaches involving fewer than 500 individuals, the covered entity must maintain a log and submit it annually to the Secretary within 60 days after the end of the calendar year.",
+    "keywords": ["HHS notification", "Secretary notification", "breach reporting", "annual breach log", "500 threshold", "OCR notification"]
+  },
+  {
+    "control_id": "164.410",
+    "control_name": "Notification by a Business Associate",
+    "family": "Breach Notification",
+    "description": "A business associate must notify the covered entity of a breach of unsecured protected health information without unreasonable delay and in no case later than 60 calendar days from discovery. The notification must include identification of each individual whose information has been or is reasonably believed to have been affected, and any other available information that the covered entity would need to include in its notification to individuals.",
+    "keywords": ["business associate notification", "BA breach notification", "vendor breach", "subcontractor breach", "60 days", "breach discovery by BA"]
+  },
+  {
+    "control_id": "164.412",
+    "control_name": "Law Enforcement Delay",
+    "family": "Breach Notification",
+    "description": "If a law enforcement official determines that a breach notification, notice, or posting would impede a criminal investigation or cause damage to national security, the covered entity or business associate must delay the notification if the law enforcement official's statement is in writing or, if oral, document the statement and delay the notification for no longer than 30 days from the date of the oral statement.",
+    "keywords": ["law enforcement delay", "notification delay", "criminal investigation", "national security", "delayed notification"]
+  },
+  {
+    "control_id": "164.414",
+    "control_name": "Administrative Requirements and Burden of Proof",
+    "family": "Breach Notification",
+    "description": "A covered entity or business associate has the burden of demonstrating that all notifications were made as required, or that a use or disclosure did not constitute a breach. A covered entity must maintain documentation sufficient to meet this burden of proof and retain such documentation for six years.",
+    "keywords": ["burden of proof", "breach documentation", "notification compliance", "administrative requirements", "six year retention", "compliance evidence"]
+  }
+]
