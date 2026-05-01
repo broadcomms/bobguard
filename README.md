@@ -45,20 +45,41 @@ See [`docs/BOB-USAGE.md`](docs/BOB-USAGE.md) for the full statement (forthcoming
 
 ## Quick start
 
-> Forthcoming once Phase 2 ships. Provisional commands:
+### Phase 2a: Scaffold (current)
 
 ```bash
-# 1. Install
-pnpm install
-docker compose up -d            # Postgres
-pnpm prisma migrate dev         # schema + seed
-pnpm build                      # build sample app + MCP
+# 1. Clone and install dependencies
+git clone <repo-url>
+cd bobguard
+npm install
 
-# 2. Start the bob-guard MCP (Bob will pick it up via .bob/mcp.json)
-pnpm --filter bob-guard mcp:dev
+# 2. Set up environment
+cp .env.example .env
+# Edit .env: set DATABASE_URL, JWT_SECRET (min 32 chars), ENCRYPTION_KEY (64 hex chars)
 
-# 3. Open in Bob IDE, switch to Compliance Officer mode, run /audit-pr
+# 3. Start Postgres
+docker compose up -d
+
+# 4. Run Prisma migrations
+npm run prisma:migrate
+
+# 5. Build and test
+npm run build
+npm test
+
+# 6. Start dev server
+npm run dev
+# Visit http://localhost:3000/health
 ```
+
+### Phase 2b: Routes (forthcoming)
+Auth middleware + patient/encounter/message routes with deliberate HIPAA violations.
+
+### Phase 2c: Seed + Tests (forthcoming)
+Faker synthetic data + smoke tests.
+
+### Phase 3: BobGuard MCP + Compliance Officer audit (forthcoming)
+Custom MCP server + Compliance Officer mode catches all violations.
 
 ## Repo map
 

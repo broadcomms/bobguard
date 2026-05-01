@@ -16,8 +16,10 @@ coverage/
 # Large reference PDFs — reference explicitly via @ when needed (token-budget hygiene; Session 01)
 compliance/references/hhs/*.pdf
 
-# Bob's own session exports — would recurse if loaded
-bob_sessions/
+# Bob's own session exports — Bob writes here. Do NOT block reads at the directory
+# level (Bob 1.0.2 treats .bobignore as a write block as well as read). If context
+# bloat from session reports becomes an issue later, add specific filenames here.
+# bob_sessions/
 
 # Auto-generated evidence renders (working dir)
 compliance/evidence/PR-tmp-*/
