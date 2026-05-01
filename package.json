@@ -6,6 +6,10 @@
   "engines": {
     "node": ">=20.0.0"
   },
+  "prisma": {
+    "schema": "src/prisma/schema.prisma",
+    "seed": "tsx src/prisma/seed.ts"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsx watch src/index.ts",
