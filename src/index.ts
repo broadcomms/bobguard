@@ -1,9 +1,13 @@
 import express from 'express';
 import { env } from './lib/env.js';
+import authRoutes from './routes/auth.routes.js';
+import patientRoutes from './routes/patient.routes.js';
+import encounterRoutes from './routes/encounter.routes.js';
+import messageRoutes from './routes/message.routes.js';
 
 /**
- * Minimal Express bootstrap for Phase 2a.
- * Routes will be added in Phase 2b.
+ * Express application with deliberate HIPAA violations for BobGuard demo.
+ * Phase 2b: Routes with authentication and intentional compliance gaps.
  */
 
 const app = express();
@@ -21,6 +25,12 @@ app.get('/health', (_req, res) => {
   });
 });
 
+// API Routes (Phase 2b)
+app.use('/api/auth', authRoutes);
+app.use('/api/patients', patientRoutes);
+app.use('/api/encounters', encounterRoutes);
+app.use('/api/messages', messageRoutes);
+
 // 404 handler
 app.use((_req, res) => {
   res.status(404).json({ error: 'Not Found' });
@@ -35,21 +45,23 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
   });
 });
 
-// Start server
-const server = app.listen(env.PORT, () => {
-  console.log(`🚀 Server running on port ${env.PORT}`);
-  console.log(`📊 Environment: ${env.NODE_ENV}`);
-  console.log(`🏥 Health check: http://localhost:${env.PORT}/health`);
-});
-
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully...');
-  server.close(() => {
-    console.log('Server closed');
-    process.exit(0);
+// Start server only if not in test environment
+if (env.NODE_ENV !== 'test') {
+  const server = app.listen(env.PORT, () => {
+    console.log(`🚀 Server running on port ${env.PORT}`);
+    console.log(`📊 Environment: ${env.NODE_ENV}`);
+    console.log(`🏥 Health check: http://localhost:${env.PORT}/health`);
   });
-});
+
+  // Graceful shutdown
+  process.on('SIGTERM', () => {
+    console.log('SIGTERM received, shutting down gracefully...');
+    server.close(() => {
+      console.log('Server closed');
+      process.exit(0);
+    });
+  });
+}
 
 export { app };
 

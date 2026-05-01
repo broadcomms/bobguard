@@ -1,0 +1,219 @@
+import { Router } from 'express';
+import { PrismaClient } from '@prisma/client';
+import { requireAuth, AuthenticatedRequest } from '../middleware/auth.middleware.js';
+
+/**
+ * Patient Routes
+ * 
+ * ❌ DELIBERATE HIPAA VIOLATIONS:
+ * 1. No audit logging (§164.312(b)) - PHI access is not logged
+ * 2. Unencrypted PHI at rest (§164.312(a)(2)(iv)) - dob, mrn, ssn stored as plain text
+ * 
+ * HIPAA §164.312(b) requires "hardware, software, and/or procedural mechanisms
+ * that record and examine activity in information systems that contain or use
+ * electronic protected health information."
+ * 
+ * COMPLIANCE FIX:
+ * 1. Import and call audit.log() for all PHI access operations
+ * 2. Use phi-crypto.encryptAtRest() for sensitive fields before storage
+ */
+
+const router = Router();
+const prisma = new PrismaClient();
+
+/**
+ * POST /patients
+ * 
+ * Creates a new patient record.
+ * ❌ VIOLATION: No audit log, unencrypted PHI
+ */
+router.post('/', requireAuth, async (req: AuthenticatedRequest, res) => {
+  try {
+    const { name, dob, mrn, ssn } = req.body;
+
+    // Validate input
+    if (!name || !dob || !mrn || !ssn) {
+      res.status(400).json({ error: 'All fields are required: name, dob, mrn, ssn' });
+      return;
+    }
+
+    // ❌ VIOLATION: Store PHI without encryption
+    const patient = await prisma.patient.create({
+      data: {
+        name,
+        dob,
+        mrn,
+        ssn,
+      },
+    });
+
+    // ❌ VIOLATION: No audit.log() call for PHI creation
+    // Should log: { actor: req.user.id, action: 'CREATE', resource: `Patient:${patient.id}`, outcome: 'SUCCESS' }
+
+    res.status(201).json(patient);
+  } catch (error) {
+    console.error('Create patient error:', error);
+    
+    // Check for unique constraint violation on MRN
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
+      res.status(409).json({ error: 'Patient with this MRN already exists' });
+      return;
+    }
+    
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * GET /patients/:id
+ * 
+ * Retrieves a single patient record by ID.
+ * ❌ VIOLATION: No audit log for PHI access
+ */
+router.get('/:id', requireAuth, async (req: AuthenticatedRequest, res) => {
+  try {
+    const { id } = req.params;
+
+    const patient = await prisma.patient.findUnique({
+      where: { id },
+    });
+
+    if (!patient) {
+      res.status(404).json({ error: 'Patient not found' });
+      return;
+    }
+
+    // ❌ VIOLATION: No audit.log() call for PHI access
+    // Should log: { actor: req.user.id, action: 'READ', resource: `Patient:${id}`, outcome: 'SUCCESS' }
+
+    res.json(patient);
+  } catch (error) {
+    console.error('Get patient error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * GET /patients
+ * 
+ * Lists all patients (with pagination support).
+ * ❌ VIOLATION: No audit log for bulk PHI access
+ */
+router.get('/', requireAuth, async (req: AuthenticatedRequest, res) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const [patients, total] = await Promise.all([
+      prisma.patient.findMany({
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.patient.count(),
+    ]);
+
+    // ❌ VIOLATION: No audit.log() call for bulk PHI access
+    // Should log: { actor: req.user.id, action: 'LIST', resource: 'Patient', outcome: 'SUCCESS', metadata: { count: patients.length } }
+
+    res.json({
+      data: patients,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error('List patients error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * PUT /patients/:id
+ * 
+ * Updates a patient record.
+ * ❌ VIOLATION: No audit log for PHI modification
+ */
+router.put('/:id', requireAuth, async (req: AuthenticatedRequest, res) => {
+  try {
+    const { id } = req.params;
+    const { name, dob, mrn, ssn } = req.body;
+
+    // Check if patient exists
+    const existingPatient = await prisma.patient.findUnique({
+      where: { id },
+    });
+
+    if (!existingPatient) {
+      res.status(404).json({ error: 'Patient not found' });
+      return;
+    }
+
+    // ❌ VIOLATION: Update PHI without encryption
+    const patient = await prisma.patient.update({
+      where: { id },
+      data: {
+        ...(name && { name }),
+        ...(dob && { dob }),
+        ...(mrn && { mrn }),
+        ...(ssn && { ssn }),
+      },
+    });
+
+    // ❌ VIOLATION: No audit.log() call for PHI modification
+    // Should log: { actor: req.user.id, action: 'UPDATE', resource: `Patient:${id}`, outcome: 'SUCCESS' }
+
+    res.json(patient);
+  } catch (error) {
+    console.error('Update patient error:', error);
+    
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
+      res.status(409).json({ error: 'Patient with this MRN already exists' });
+      return;
+    }
+    
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * DELETE /patients/:id
+ * 
+ * Deletes a patient record.
+ * ❌ VIOLATION: No audit log for PHI deletion
+ */
+router.delete('/:id', requireAuth, async (req: AuthenticatedRequest, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if patient exists
+    const existingPatient = await prisma.patient.findUnique({
+      where: { id },
+    });
+
+    if (!existingPatient) {
+      res.status(404).json({ error: 'Patient not found' });
+      return;
+    }
+
+    await prisma.patient.delete({
+      where: { id },
+    });
+
+    // ❌ VIOLATION: No audit.log() call for PHI deletion
+    // Should log: { actor: req.user.id, action: 'DELETE', resource: `Patient:${id}`, outcome: 'SUCCESS' }
+
+    res.status(204).send();
+  } catch (error) {
+    console.error('Delete patient error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+export default router;
+
+// Made with Bob
