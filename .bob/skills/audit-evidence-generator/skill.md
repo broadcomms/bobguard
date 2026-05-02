@@ -51,7 +51,11 @@ If a test is missing, write `"status": "missing"` and surface that in the threat
 Activate the `nprm-forward-compat-check` skill with `triggered_controls`. Capture the narrative blocks for inclusion in the PDF.
 
 ### Step 6 — Render the auditor PDF
-Call `bob-guard.evidence.render_pdf({ pr_number, repo_metadata, triggered_controls, control_map_md, threat_delta_md, test_evidence_json, nprm_narrative })`. The MCP renders `audit-pack.pdf` via Puppeteer.
+Read `compliance/evidence/PR-{n}/data-flow.mmd` (written in Step 2) into `data_flow_mmd`. If the file does not exist, fall back to `compliance/controls/data-flow-fixture.mmd`.
+
+Call `bob-guard.evidence.render_pdf({ pr_number, repo_metadata, triggered_controls, control_map_md, threat_delta_md, test_evidence_json, nprm_narrative, data_flow_mmd })`. The MCP renders `audit-pack.pdf` via Puppeteer and inlines the Mermaid diagram via `mmdc`.
+
+Inspect the returned `diagram_used` field — if it is `'placeholder'`, surface the fact in the threat-delta as residual risk; do not pretend the diagram rendered.
 
 ### Step 7 — Register with watsonx.governance
 Call `bob-guard.governance.register_pr({ pr_number, controls: triggered_controls, status: 'reviewed', evidence_path: 'compliance/evidence/PR-{n}/audit-pack.pdf' })`. Capture the entry ID; include it in the PDF sign-off block.

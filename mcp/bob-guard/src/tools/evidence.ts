@@ -37,6 +37,7 @@ interface RenderPdfOutput {
   pdf_path: string;
   page_count: number;
   watsonx_used: boolean;
+  diagram_used: 'mermaid' | 'placeholder' | 'none';
 }
 
 // Get root directory (3 levels up from dist/tools/ to get to project root)
@@ -46,10 +47,30 @@ const rootDir = join(dirname(new URL(import.meta.url).pathname), '../../../..');
 const PLACEHOLDER_DIAGRAM = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 
 /**
- * Render Mermaid diagram to base64-encoded PNG
- * Returns data URI or placeholder on failure
+ * Load BobGuard logo and convert to data URI
  */
-async function renderMermaidDiagram(mmdSource: string): Promise<string> {
+function loadLogoAsDataUri(): string {
+  try {
+    const logoPath = join(rootDir, 'mcp/bob-guard/templates/bobguard-logo.png');
+    const logoBuffer = readFileSync(logoPath);
+    const base64Logo = logoBuffer.toString('base64');
+    return `data:image/png;base64,${base64Logo}`;
+  } catch (error) {
+    console.warn('Failed to load BobGuard logo, using placeholder:', error);
+    return PLACEHOLDER_DIAGRAM;
+  }
+}
+
+// Local mmdc binary, installed via @mermaid-js/mermaid-cli in this package
+const MMDC_BIN = join(rootDir, 'mcp/bob-guard/node_modules/.bin/mmdc');
+
+/**
+ * Render Mermaid diagram to base64-encoded PNG.
+ * Returns { dataUri, ok } — ok=false means caller should treat as placeholder.
+ */
+async function renderMermaidDiagram(
+  mmdSource: string
+): Promise<{ dataUri: string; ok: boolean }> {
   const tempDir = join(rootDir, 'mcp/bob-guard/renders');
   mkdirSync(tempDir, { recursive: true });
 
@@ -58,35 +79,26 @@ async function renderMermaidDiagram(mmdSource: string): Promise<string> {
   const pngPath = join(tempDir, `temp-${timestamp}.png`);
 
   try {
-    // Write Mermaid source to temp file
     writeFileSync(mmdPath, mmdSource, 'utf-8');
 
-    // Run mermaid-cli to generate PNG
     execSync(
-      `npx -p @mermaid-js/mermaid-cli mmdc -i "${mmdPath}" -o "${pngPath}" --quiet`,
+      `"${MMDC_BIN}" -i "${mmdPath}" -o "${pngPath}" --quiet`,
       { cwd: rootDir, stdio: 'pipe' }
     );
 
-    // Read PNG and convert to base64
     const pngBuffer = readFileSync(pngPath);
     const base64 = pngBuffer.toString('base64');
 
-    // Cleanup temp files
     unlinkSync(mmdPath);
     unlinkSync(pngPath);
 
-    return `data:image/png;base64,${base64}`;
+    return { dataUri: `data:image/png;base64,${base64}`, ok: true };
   } catch (error) {
-    // Cleanup on error
-    try {
-      unlinkSync(mmdPath);
-    } catch {}
-    try {
-      unlinkSync(pngPath);
-    } catch {}
+    try { unlinkSync(mmdPath); } catch {}
+    try { unlinkSync(pngPath); } catch {}
 
     console.error('Mermaid rendering failed:', error);
-    return PLACEHOLDER_DIAGRAM;
+    return { dataUri: PLACEHOLDER_DIAGRAM, ok: false };
   }
 }
 
@@ -109,7 +121,7 @@ export async function renderPdf(input: RenderPdfInput): Promise<RenderPdfOutput>
   const cssPath = join(rootDir, 'mcp/bob-guard/templates/audit-pack.css');
   
   let htmlTemplate = readFileSync(templatePath, 'utf-8');
-  const css = readFileSync(cssPath, 'utf-8');
+  let css = readFileSync(cssPath, 'utf-8');
 
   // Generate executive summary via watsonx.ai
   const executiveSummary = await generateProse('executive_summary', {
@@ -125,9 +137,16 @@ export async function renderPdf(input: RenderPdfInput): Promise<RenderPdfOutput>
   });
 
   // Render Mermaid diagram if provided
-  const dataFlowDiagram = data_flow_mmd
-    ? await renderMermaidDiagram(data_flow_mmd)
-    : PLACEHOLDER_DIAGRAM;
+  let dataFlowDiagram: string;
+  let diagramUsed: 'mermaid' | 'placeholder' | 'none';
+  if (data_flow_mmd) {
+    const result = await renderMermaidDiagram(data_flow_mmd);
+    dataFlowDiagram = result.dataUri;
+    diagramUsed = result.ok ? 'mermaid' : 'placeholder';
+  } else {
+    dataFlowDiagram = PLACEHOLDER_DIAGRAM;
+    diagramUsed = 'none';
+  }
 
   // Determine status
   const hasBlockers = triggered_controls.some(c => c.severity === 'block');
@@ -161,6 +180,9 @@ export async function renderPdf(input: RenderPdfInput): Promise<RenderPdfOutput>
   // Format test evidence
   const testEvidence = JSON.stringify(test_evidence_json, null, 2);
 
+  // Load BobGuard logo as data URI
+  const bobguardLogo = loadLogoAsDataUri();
+
   // Substitute all variables
   const substitutions: Record<string, string> = {
     pr_number: pr_number.toString(),
@@ -180,14 +202,18 @@ export async function renderPdf(input: RenderPdfInput): Promise<RenderPdfOutput>
     nprm_control_blocks: nprm_control_blocks || '<p><em>No controls affected by 2024 NPRM</em></p>',
     governance_entry_id: 'pending',
     governance_status: 'pending',
+    bobguard_logo: bobguardLogo,
   };
 
-  // Simple {{var}} replacement
+  // Simple {{var}} replacement — apply to BOTH the HTML body and the CSS
+  // (CSS @page running headers reference {{repo_name}} and {{pr_number}})
   for (const [key, value] of Object.entries(substitutions)) {
-    htmlTemplate = htmlTemplate.replace(new RegExp(`{{${key}}}`, 'g'), value);
+    const re = new RegExp(`{{${key}}}`, 'g');
+    htmlTemplate = htmlTemplate.replace(re, value);
+    css = css.replace(re, value);
   }
 
-  // Inline CSS
+  // Inline CSS (post-substitution)
   htmlTemplate = htmlTemplate.replace(
     '<link rel="stylesheet" href="audit-pack.css">',
     `<style>${css}</style>`
@@ -230,6 +256,7 @@ export async function renderPdf(input: RenderPdfInput): Promise<RenderPdfOutput>
       pdf_path: pdfPath,
       page_count: pageCount,
       watsonx_used: watsonxUsed,
+      diagram_used: diagramUsed,
     };
   } finally {
     await browser.close();

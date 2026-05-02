@@ -1,5 +1,7 @@
 // @ts-ignore - SDK types may not be fully available
 import { WatsonXAI } from '@ibm-cloud/watsonx-ai';
+// @ts-ignore - authenticator types
+import { IamAuthenticator } from '@ibm-cloud/watsonx-ai/authentication/index.js';
 
 type Section = 'executive_summary' | 'threat_delta' | 'nprm_narrative' | 'control_rationale';
 
@@ -89,13 +91,14 @@ export async function generateProse(section: Section, context: SectionContext): 
     // @ts-ignore - SDK types may not match exactly
     const watsonx = WatsonXAI.newInstance({
       version: '2024-05-31',
-      serviceUrl: 'https://us-south.ml.cloud.ibm.com',
+      serviceUrl: process.env.WATSONX_AI_URL || 'https://us-south.ml.cloud.ibm.com',
+      authenticator: new IamAuthenticator({ apikey: apiKey }),
     });
 
     const prompt = PROMPTS[section](context);
 
     // @ts-ignore - SDK method signature may vary
-    const response = await watsonx.textGeneration({
+    const response = await watsonx.generateText({
       input: prompt,
       modelId,
       projectId,

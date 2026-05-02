@@ -1,7 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderPdf } from './evidence.js';
 import { mkdirSync, rmSync, existsSync, statSync, readFileSync } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const repoRoot = join(__dirname, '../../../..');
 
 // Mock watsonx to avoid real API calls
 vi.mock('../lib/watsonx.js', () => ({
@@ -11,7 +15,7 @@ vi.mock('../lib/watsonx.js', () => ({
 }));
 
 describe('evidence.renderPdf', () => {
-  const testOutputDir = join(process.cwd(), 'compliance/evidence/PR-999');
+  const testOutputDir = join(repoRoot, 'compliance/evidence/PR-999');
 
   beforeEach(() => {
     // Clean up test directory before each test
@@ -208,8 +212,8 @@ describe('evidence.renderPdf', () => {
   }, 30000);
 
   it('renders Mermaid diagram when data_flow_mmd provided', async () => {
-    // Read the test fixture (path relative to project root, not mcp/bob-guard)
-    const fixturePath = join(process.cwd(), '../../compliance/controls/data-flow-fixture.mmd');
+    // Read the test fixture from the repo root, resolved relative to this test file
+    const fixturePath = join(repoRoot, 'compliance/controls/data-flow-fixture.mmd');
     const mmdSource = readFileSync(fixturePath, 'utf-8');
 
     const input = {

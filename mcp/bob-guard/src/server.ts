@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { config as loadDotenv } from 'dotenv';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
@@ -8,13 +9,18 @@ import {
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Load .env from the repo root so WATSONX_AI_KEY etc. are available to tool handlers.
+// Path: <repoRoot>/mcp/bob-guard/dist/server.js → ../../../../.env
+loadDotenv({ path: join(__dirname, '../../../../.env') });
+
 import { createControlsLookupTool, createControlsScanTool } from './tools/controls.js';
 import { createNPRMForwardCompatCheckTool } from './tools/nprm.js';
 import { createGovernanceRegisterPRTool } from './tools/governance.js';
 import { renderPdf } from './tools/evidence.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 /**
  * BobGuard MCP Server
