@@ -56,6 +56,14 @@ cp .env.example .env
 # Edit .env: set DATABASE_URL, JWT_SECRET (min 32 chars), ENCRYPTION_KEY (64 hex chars)
 # Optional: add WATSONX_AI_KEY, WATSONX_AI_PROJECT_ID, WATSONX_AI_MODEL for live prose generation
 
+# 2.1 Confirm watsonx env vars are set
+grep -E "^WATSONX_AI_KEY|^WATSONX_AI_PROJECT_ID|^WATSONX_AI_MODEL" .env
+# Expect:
+#   WATSONX_AI_KEY=...
+#   WATSONX_AI_PROJECT_ID=...
+#   WATSONX_AI_MODEL=ibm/granite-3-8b-instruct
+
+
 # 3. Start Postgres
 docker compose up -d
 
@@ -78,10 +86,29 @@ npm run mcp:build
 npm test
 cd ../..
 
+# 8. Pre-warm the audit-pack so opening it is instant
+open compliance/evidence/PR-1/audit-pack.pdf
+
 # 8. Configure Bob IDE
 # Add mcp/bob-guard to Bob Settings → MCP
 # Restart Bob to load the Compliance Officer mode
 # Use /audit-pr in Compliance Officer mode to scan diffs
+
+
+# 9. Swith to Compliance Officer mode (In Bob Chat)
+# Mode: Compliance Officer
+# MCP Panel: bob-guard shows green
+# MCP Panel tools: show all 5 tools
+# Bob Findings Panel cleared
+
+# 10. Open Prisma Exhibit
+# In Bob Editor src/prisma/schema.prisma (the file with the deliberate dob/mrn/ssn violations) — this is "exhibit A" diff
+
+# 11. Open Bob chat panel
+# Select: "Compliance Officer"
+# Type the command: "/audit-pr"
+# Click "Open"
+
 ```
 
 ## Demo asset
@@ -98,8 +125,10 @@ The hackathon submission is a working POC. The following items from Bob's own co
 - **Magic constants** (Low) — `max_new_tokens: 1500` should be a named constant.
 - **Page-count estimation accuracy** (Low) — current heuristic is approximate; should query Puppeteer for actual page count post-render.
 - **DRY violation between CSS severity classes and TypeScript severity-class generator** (Low) — should share a single source of truth.
+- **watsonx.governance integration is a liveness check, not a Factsheet write** (Medium) — `governance.register_pr` does a real IBM IAM token exchange + `GET /openscale/{instance_id}/v2/subscriptions` against the configured instance, then persists the audit register entry locally with the round-trip stamped in `ibm_governance_check`. Production should swap the GET for a `POST /v2/factsheets/...` call once a Factsheet / AI Use Case is provisioned in the watsonx.governance instance.
+- **node:https instead of fetch in `src/lib/http.ts`** (Low) — required because the OpenScale gateway returns HTTP 500 to undici-shaped requests for our user's instance. Once the IBM-side issue is resolved, the helper can be replaced with the global fetch.
 
-These do not affect the working pipeline or the demo. BobGuard's own `/audit-pr` against itself flagged them — proving the system is candid about its own gaps.
+These do not affect the working pipeline or the demo. BobGuard's own `/audit-pr` against itself flagged most of them — proving the system is candid about its own gaps.
 
 ## Repo map
 

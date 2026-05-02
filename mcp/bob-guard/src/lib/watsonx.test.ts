@@ -19,7 +19,14 @@ vi.mock('@ibm-cloud/watsonx-ai', () => ({
 }));
 
 vi.mock('@ibm-cloud/watsonx-ai/authentication/index.js', () => ({
-  IamAuthenticator: vi.fn().mockImplementation((opts: { apikey: string }) => opts),
+  // Class form so `new IamAuthenticator(...)` works under vitest's mock
+  // (vi.fn(opts => opts) is not a constructor).
+  IamAuthenticator: class {
+    apikey: string;
+    constructor(opts: { apikey: string }) {
+      this.apikey = opts.apikey;
+    }
+  },
 }));
 
 describe('watsonx.generateProse', () => {

@@ -1,50 +1,54 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { createGovernanceRegisterPRTool } from './governance.js';
 import { readFileSync, existsSync, rmSync } from 'fs';
+
+const mockHttp = vi.hoisted(() => ({ httpJsonRequest: vi.fn() }));
+vi.mock('../lib/http.js', () => mockHttp);
+
+import { createGovernanceRegisterPRTool } from './governance.js';
+
+const IAM_URL = 'https://iam.cloud.ibm.com/identity/token';
+const GOV_URL = 'https://api.example.com/openscale/test-instance/v2/subscriptions';
+
+const okIamResponse = {
+  status: 200,
+  body: JSON.stringify({ access_token: 'test-iam-access-token' }),
+};
+const okGovResponse = (count = 0) => ({
+  status: 200,
+  body: JSON.stringify({ subscriptions: new Array(count).fill({}) }),
+});
+
+function stubHttp(iam: { status: number; body: string }, gov: { status: number; body: string }) {
+  mockHttp.httpJsonRequest.mockImplementation(async (opts: any) =>
+    opts.url.includes('iam.cloud.ibm.com') ? iam : gov
+  );
+}
 
 describe('Governance Registration Tool', () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
-    // Reset environment
     process.env = { ...originalEnv };
-    
-    // Clean up any test evidence directories
     const testDir = 'compliance/evidence/PR-9999';
-    if (existsSync(testDir)) {
-      rmSync(testDir, { recursive: true, force: true });
-    }
+    if (existsSync(testDir)) rmSync(testDir, { recursive: true, force: true });
+    mockHttp.httpJsonRequest.mockReset();
   });
 
   afterEach(() => {
-    // Restore environment
     process.env = originalEnv;
-    
-    // Clean up test evidence directories
     const testDir = 'compliance/evidence/PR-9999';
-    if (existsSync(testDir)) {
-      rmSync(testDir, { recursive: true, force: true });
-    }
+    if (existsSync(testDir)) rmSync(testDir, { recursive: true, force: true });
   });
 
-  it('should return status "live" when API returns success', async () => {
-    // Mock environment variables
-    process.env.WATSONX_GOVERNANCE_URL = 'https://api.example.com/governance';
-    process.env.WATSONX_GOVERNANCE_KEY = 'test-key';
+  it('returns status "live" when IAM exchange + governance liveness check both succeed', async () => {
+    process.env.WATSONX_GOVERNANCE_URL = GOV_URL;
+    process.env.WATSONX_GOVERNANCE_KEY = 'test-apikey';
+    process.env.WATSONX_GOVERNANCE_INSTANCE_ID = 'test-instance';
     process.env.GITHUB_REPO = 'test/repo';
 
-    // Mock fetch to return success
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        entry_id: 'live-12345',
-        status: 'registered',
-        timestamp: new Date().toISOString(),
-      }),
-    });
+    stubHttp(okIamResponse, okGovResponse(0));
 
     const tool = createGovernanceRegisterPRTool();
-
     const result = await tool({
       pr_number: 9999,
       controls: [{ control_id: '164.312(a)(2)(iv)', status: 'violated' }],
@@ -53,32 +57,46 @@ describe('Governance Registration Tool', () => {
     });
 
     const response = JSON.parse(result.content[0].text);
-
-    expect(response.entry_id).toBe('live-12345');
     expect(response.status).toBe('live');
-    expect(global.fetch).toHaveBeenCalledWith(
-      'https://api.example.com/governance',
+    expect(response.entry_id).toMatch(/^live-/);
+
+    expect(mockHttp.httpJsonRequest).toHaveBeenCalledWith(
       expect.objectContaining({
         method: 'POST',
+        url: IAM_URL,
+        body: expect.stringContaining('apikey=test-apikey'),
+      })
+    );
+    expect(mockHttp.httpJsonRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'GET',
+        url: GOV_URL,
         headers: expect.objectContaining({
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer test-key',
+          Authorization: 'Bearer test-iam-access-token',
         }),
       })
     );
+
+    const fileContent = JSON.parse(
+      readFileSync('compliance/evidence/PR-9999/governance-register-result.json', 'utf-8')
+    );
+    expect(fileContent.mode).toBe('live');
+    expect(fileContent.ibm_governance_check).toMatchObject({
+      url: GOV_URL,
+      instance_id: 'test-instance',
+      iam_authenticated: true,
+      http_status: 200,
+      resource_count: 0,
+    });
   });
 
-  it('should fall back to mocked mode when fetch throws network error', async () => {
-    // Mock environment variables
-    process.env.WATSONX_GOVERNANCE_URL = 'https://api.example.com/governance';
-    process.env.WATSONX_GOVERNANCE_KEY = 'test-key';
-    process.env.GITHUB_REPO = 'test/repo';
+  it('falls back to mocked mode when IAM token exchange returns 401', async () => {
+    process.env.WATSONX_GOVERNANCE_URL = GOV_URL;
+    process.env.WATSONX_GOVERNANCE_KEY = 'bad-apikey';
 
-    // Mock fetch to throw network error
-    global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
+    stubHttp({ status: 401, body: '{}' }, okGovResponse());
 
     const tool = createGovernanceRegisterPRTool();
-
     const result = await tool({
       pr_number: 9999,
       controls: [{ control_id: '164.312(b)', status: 'violated' }],
@@ -87,35 +105,23 @@ describe('Governance Registration Tool', () => {
     });
 
     const response = JSON.parse(result.content[0].text);
-
     expect(response.status).toBe('mocked');
     expect(response.entry_id).toMatch(/^mock-/);
 
-    // Verify file was written
-    const filePath = 'compliance/evidence/PR-9999/governance-register-result.json';
-    expect(existsSync(filePath)).toBe(true);
-
-    const fileContent = JSON.parse(readFileSync(filePath, 'utf-8'));
+    const fileContent = JSON.parse(
+      readFileSync('compliance/evidence/PR-9999/governance-register-result.json', 'utf-8')
+    );
     expect(fileContent.mode).toBe('mocked');
-    expect(fileContent.entry_id).toBe(response.entry_id);
-    expect(fileContent.payload.pr_number).toBe(9999);
+    expect(fileContent.ibm_governance_check).toBeUndefined();
   });
 
-  it('should fall back to mocked mode when API returns 500', async () => {
-    // Mock environment variables
-    process.env.WATSONX_GOVERNANCE_URL = 'https://api.example.com/governance';
-    process.env.WATSONX_GOVERNANCE_KEY = 'test-key';
-    process.env.GITHUB_REPO = 'test/repo';
+  it('falls back to mocked mode when the governance liveness check returns 5xx', async () => {
+    process.env.WATSONX_GOVERNANCE_URL = GOV_URL;
+    process.env.WATSONX_GOVERNANCE_KEY = 'test-apikey';
 
-    // Mock fetch to return 500
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: false,
-      status: 500,
-      json: async () => ({ error: 'Internal server error' }),
-    });
+    stubHttp(okIamResponse, { status: 500, body: 'Internal server error' });
 
     const tool = createGovernanceRegisterPRTool();
-
     const result = await tool({
       pr_number: 9999,
       controls: [{ control_id: '164.312(d)', status: 'violated' }],
@@ -124,44 +130,33 @@ describe('Governance Registration Tool', () => {
     });
 
     const response = JSON.parse(result.content[0].text);
-
     expect(response.status).toBe('mocked');
-    expect(response.entry_id).toMatch(/^mock-/);
-
-    // Verify file was written
-    const filePath = 'compliance/evidence/PR-9999/governance-register-result.json';
-    expect(existsSync(filePath)).toBe(true);
+    expect(existsSync('compliance/evidence/PR-9999/governance-register-result.json')).toBe(true);
   });
 
-  it('should use filename "governance-register-result.json" regardless of mode', async () => {
-    // Test mocked mode (no env vars)
-    delete process.env.WATSONX_GOVERNANCE_URL;
-    delete process.env.WATSONX_GOVERNANCE_KEY;
+  it('falls back to mocked mode on transport errors', async () => {
+    process.env.WATSONX_GOVERNANCE_URL = GOV_URL;
+    process.env.WATSONX_GOVERNANCE_KEY = 'test-apikey';
+
+    mockHttp.httpJsonRequest.mockRejectedValue(new Error('Network error'));
 
     const tool = createGovernanceRegisterPRTool();
-
-    await tool({
+    const result = await tool({
       pr_number: 9999,
       controls: [{ control_id: '164.312(e)(1)', status: 'violated' }],
       status: 'blocked',
       evidence_path: 'compliance/evidence/PR-9999/audit-pack.pdf',
     });
 
-    // Verify exact filename
-    const filePath = 'compliance/evidence/PR-9999/governance-register-result.json';
-    expect(existsSync(filePath)).toBe(true);
-
-    const fileContent = JSON.parse(readFileSync(filePath, 'utf-8'));
-    expect(fileContent.mode).toBe('mocked');
+    const response = JSON.parse(result.content[0].text);
+    expect(response.status).toBe('mocked');
   });
 
-  it('should fall back to mocked mode when env vars are missing', async () => {
-    // No environment variables set
+  it('falls back to mocked mode when env vars are missing', async () => {
     delete process.env.WATSONX_GOVERNANCE_URL;
     delete process.env.WATSONX_GOVERNANCE_KEY;
 
     const tool = createGovernanceRegisterPRTool();
-
     const result = await tool({
       pr_number: 9999,
       controls: [{ control_id: '164.312(a)(1)', status: 'compliant' }],
@@ -170,13 +165,25 @@ describe('Governance Registration Tool', () => {
     });
 
     const response = JSON.parse(result.content[0].text);
-
     expect(response.status).toBe('mocked');
-    expect(response.entry_id).toMatch(/^mock-/);
+    expect(existsSync('compliance/evidence/PR-9999/governance-register-result.json')).toBe(true);
+  });
 
-    // Verify file was written
+  it('always writes to filename "governance-register-result.json" regardless of mode', async () => {
+    delete process.env.WATSONX_GOVERNANCE_URL;
+    delete process.env.WATSONX_GOVERNANCE_KEY;
+
+    const tool = createGovernanceRegisterPRTool();
+    await tool({
+      pr_number: 9999,
+      controls: [{ control_id: '164.312(e)(1)', status: 'violated' }],
+      status: 'blocked',
+      evidence_path: 'compliance/evidence/PR-9999/audit-pack.pdf',
+    });
+
     const filePath = 'compliance/evidence/PR-9999/governance-register-result.json';
     expect(existsSync(filePath)).toBe(true);
+    expect(JSON.parse(readFileSync(filePath, 'utf-8')).mode).toBe('mocked');
   });
 });
 
