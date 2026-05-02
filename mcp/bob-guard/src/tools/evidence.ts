@@ -3,10 +3,20 @@ import { join, dirname } from 'path';
 import { execSync } from 'child_process';
 import puppeteer from 'puppeteer';
 import { marked } from 'marked';
+import DOMPurify from 'isomorphic-dompurify';
 import { generateProse } from '../lib/watsonx.js';
 
 // Configure marked: GFM on, no HTML pass-through (sanitize via escape).
 marked.setOptions({ gfm: true, breaks: false });
+
+// DOMPurify allowlist for the watsonx-generated prose sections. Keeps the
+// markdown elements we actually use, plus the severity-class spans/strong
+// tags injected by the post-processing step below. Anything else (script,
+// iframe, style, on* handlers, javascript: URIs) is stripped.
+const PROSE_SANITIZE_CONFIG = {
+  ALLOWED_TAGS: ['h3', 'h4', 'p', 'ul', 'ol', 'li', 'strong', 'em', 'span', 'br', 'code'],
+  ALLOWED_ATTR: ['class'],
+};
 
 /**
  * Render watsonx-generated markdown to HTML, then color-code severity
@@ -24,10 +34,10 @@ function renderProseMarkdown(md: string): string {
     .replace(/^\s*#{1,2}\s+.+$/gm, '')
     .trim();
   const html = marked.parse(cleaned) as string;
-  // Severity post-processing — wrap leading bold "Critical/High/Medium"
-  // tokens in colored spans. Only matches when the bold token is the WHOLE
-  // <strong> contents (not partial text), and only at the start of a list item.
-  return html
+  // Severity post-processing — tag the leading bold "Critical/High/Medium"
+  // token in each list item with a color class. Runs BEFORE sanitize so the
+  // class attribute survives DOMPurify's allowlist.
+  const withSeverity = html
     .replace(
       /<li>\s*<strong>(Critical|CRITICAL)<\/strong>/g,
       '<li><strong class="severity-critical">Critical</strong>'
@@ -40,6 +50,9 @@ function renderProseMarkdown(md: string): string {
       /<li>\s*<strong>(Medium|MEDIUM)<\/strong>/g,
       '<li><strong class="severity-medium">Medium</strong>'
     );
+  // Sanitize as the final step. Watsonx output is untrusted — strip any
+  // <script>, <iframe>, on* handlers, or javascript: URIs the model emits.
+  return DOMPurify.sanitize(withSeverity, PROSE_SANITIZE_CONFIG);
 }
 
 interface TriggeredControl {

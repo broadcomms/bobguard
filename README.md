@@ -88,6 +88,19 @@ cd ../..
 
 **[Open compliance/evidence/PR-1/audit-pack.pdf](compliance/evidence/PR-1/audit-pack.pdf)** to see what BobGuard produces. No setup required.
 
+## Production hardening notes
+
+The hackathon submission is a working POC. The following items from Bob's own code review are documented as known follow-ups for production deployment:
+
+- **Severity token case-sensitivity** (Medium) — regex matching on Critical/High/Medium severity tokens in watsonx output should be case-insensitive to handle model output variation.
+- **Silent failure on empty markdown** (Medium) — markdown sanitization that removes all content should surface a warning rather than render an empty section.
+- **Hardcoded severity-to-control mapping in prompts** (Medium) — should be derived from the controls catalog rather than hardcoded in `src/lib/watsonx.ts` prompt templates.
+- **Magic constants** (Low) — `max_new_tokens: 1500` should be a named constant.
+- **Page-count estimation accuracy** (Low) — current heuristic is approximate; should query Puppeteer for actual page count post-render.
+- **DRY violation between CSS severity classes and TypeScript severity-class generator** (Low) — should share a single source of truth.
+
+These do not affect the working pipeline or the demo. BobGuard's own `/audit-pr` against itself flagged them — proving the system is candid about its own gaps.
+
 ## Repo map
 
 ```
