@@ -11,6 +11,7 @@ import { dirname, join } from 'path';
 import { createControlsLookupTool, createControlsScanTool } from './tools/controls.js';
 import { createNPRMForwardCompatCheckTool } from './tools/nprm.js';
 import { createGovernanceRegisterPRTool } from './tools/governance.js';
+import { renderPdf } from './tools/evidence.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -87,6 +88,7 @@ const controlsLookup = createControlsLookupTool(controlsMap);
 const controlsScan = createControlsScanTool(controlsMap);
 const nprm_forward_compat_check = createNPRMForwardCompatCheckTool(nprm_overlay, controlsMap);
 const governance_register_pr = createGovernanceRegisterPRTool();
+const evidence_render_pdf = renderPdf;
 
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
@@ -186,6 +188,64 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['pr_number', 'controls', 'status', 'evidence_path'],
         },
       },
+      {
+        name: 'evidence.render_pdf',
+        description: 'Renders a HIPAA compliance audit pack PDF with watsonx.ai-generated prose, control mappings, threat analysis, and test evidence.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            pr_number: {
+              type: 'number',
+              description: 'Pull request number',
+            },
+            repo_metadata: {
+              type: 'object',
+              description: 'Repository metadata',
+              properties: {
+                repo_name: { type: 'string' },
+                branch: { type: 'string' },
+                commit_sha: { type: 'string' },
+                author: { type: 'string' },
+              },
+              required: ['repo_name', 'branch', 'commit_sha', 'author'],
+            },
+            triggered_controls: {
+              type: 'array',
+              description: 'Array of triggered control objects',
+              items: {
+                type: 'object',
+                properties: {
+                  control_id: { type: 'string' },
+                  control_name: { type: 'string' },
+                  family: { type: 'string' },
+                  file: { type: 'string' },
+                  line: { type: 'number' },
+                  severity: { type: 'string' },
+                  existing_status: { type: 'string' },
+                  nprm_status: { type: 'string' },
+                },
+              },
+            },
+            control_map_md: {
+              type: 'string',
+              description: 'Markdown table of control mappings',
+            },
+            threat_delta_md: {
+              type: 'string',
+              description: 'Threat model delta description',
+            },
+            test_evidence_json: {
+              type: 'object',
+              description: 'Test evidence as JSON object',
+            },
+            nprm_narrative: {
+              type: 'string',
+              description: 'NPRM forward-compatibility narrative',
+            },
+          },
+          required: ['pr_number', 'repo_metadata', 'triggered_controls', 'control_map_md', 'threat_delta_md', 'test_evidence_json', 'nprm_narrative'],
+        },
+      },
     ],
   };
 });
@@ -216,6 +276,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       status: 'reviewed' | 'approved' | 'blocked';
       evidence_path: string;
     });
+  }
+
+  if (name === 'evidence.render_pdf') {
+    const result = await evidence_render_pdf(args as any);
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(result, null, 2),
+        },
+      ],
+    };
   }
 
   throw new Error(`Unknown tool: ${name}`);

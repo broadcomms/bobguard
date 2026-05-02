@@ -1,0 +1,354 @@
+/* BobGuard Audit Pack CSS - Print-Friendly Styles */
+
+/* Page Setup */
+@page {
+  size: letter;
+  margin: 0.75in 0.75in 1in 0.75in;
+  
+  @top-center {
+    content: "BobGuard HIPAA Compliance Audit";
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 9pt;
+    color: #666;
+  }
+  
+  @bottom-right {
+    content: "Page " counter(page) " of " counter(pages);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 9pt;
+    color: #666;
+  }
+}
+
+/* Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 11pt;
+  line-height: 1.6;
+  color: #333;
+  background: white;
+}
+
+/* Section Breaks */
+section {
+  page-break-after: always;
+  page-break-inside: avoid;
+  margin-bottom: 2em;
+}
+
+section:last-child {
+  page-break-after: auto;
+}
+
+/* Headings */
+h1 {
+  font-size: 28pt;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.5em;
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: 18pt;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.75em;
+  padding-bottom: 0.25em;
+  border-bottom: 2px solid #3498db;
+}
+
+h3 {
+  font-size: 14pt;
+  font-weight: 600;
+  color: #34495e;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+/* Cover Page */
+.cover-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 9in;
+  text-align: center;
+}
+
+.logo-placeholder {
+  margin-bottom: 2em;
+}
+
+.logo-box {
+  display: inline-block;
+  padding: 1em 2em;
+  border: 3px solid #3498db;
+  border-radius: 8px;
+  font-size: 32pt;
+  font-weight: 700;
+  color: #3498db;
+  letter-spacing: 2px;
+}
+
+.cover-metadata {
+  margin: 2em 0;
+  text-align: left;
+  display: inline-block;
+}
+
+.cover-metadata p {
+  margin: 0.5em 0;
+  font-size: 12pt;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 1em 2em;
+  margin: 2em 0;
+  border-radius: 8px;
+  font-size: 14pt;
+  font-weight: 600;
+}
+
+.status-badge.status-blocked {
+  background: #e74c3c;
+  color: white;
+}
+
+.status-badge.status-approved {
+  background: #27ae60;
+  color: white;
+}
+
+.status-badge.status-reviewed {
+  background: #f39c12;
+  color: white;
+}
+
+.status-label {
+  margin-right: 0.5em;
+}
+
+.nprm-callout {
+  margin-top: 3em;
+  padding: 1.5em;
+  background: #ecf0f1;
+  border-left: 4px solid #3498db;
+  border-radius: 4px;
+  max-width: 600px;
+}
+
+.nprm-callout h2 {
+  font-size: 14pt;
+  border-bottom: none;
+  margin-bottom: 0.5em;
+  color: #2c3e50;
+}
+
+.nprm-callout p {
+  font-size: 10pt;
+  line-height: 1.5;
+  color: #555;
+}
+
+/* Section Intro */
+.section-intro {
+  font-style: italic;
+  color: #666;
+  margin-bottom: 1em;
+}
+
+/* Prose Content */
+.prose-content {
+  margin: 1em 0;
+  line-height: 1.8;
+}
+
+.prose-content p {
+  margin-bottom: 1em;
+}
+
+/* Control Table */
+.control-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+  font-size: 10pt;
+}
+
+.control-table thead {
+  background: #34495e;
+  color: white;
+}
+
+.control-table th {
+  padding: 0.75em 0.5em;
+  text-align: left;
+  font-weight: 600;
+  border: 1px solid #2c3e50;
+}
+
+.control-table td {
+  padding: 0.5em;
+  border: 1px solid #ddd;
+  vertical-align: top;
+}
+
+.control-table tbody tr:nth-child(even) {
+  background: #f8f9fa;
+}
+
+.control-table tbody tr:hover {
+  background: #e8f4f8;
+}
+
+/* Diagram Container */
+.diagram-container {
+  margin: 2em 0;
+  text-align: center;
+  padding: 1em;
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.diagram-image {
+  max-width: 100%;
+  height: auto;
+}
+
+.diagram-note {
+  margin-top: 1em;
+  font-size: 9pt;
+  color: #666;
+  text-align: center;
+}
+
+/* Test Evidence */
+.test-output {
+  background: #2c3e50;
+  color: #ecf0f1;
+  padding: 1em;
+  border-radius: 4px;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 9pt;
+  line-height: 1.4;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* NPRM Section */
+.nprm-controls {
+  margin-top: 2em;
+}
+
+.nprm-control-block {
+  margin-bottom: 2em;
+  padding: 1em;
+  background: #f8f9fa;
+  border-left: 4px solid #3498db;
+  border-radius: 4px;
+}
+
+.nprm-control-block h3 {
+  margin-top: 0;
+  color: #2c3e50;
+}
+
+.nprm-control-block p {
+  margin: 0.5em 0;
+  font-size: 10pt;
+}
+
+.nprm-control-block strong {
+  color: #2c3e50;
+}
+
+/* Sign-off Page */
+.sign-off {
+  min-height: 6in;
+}
+
+.sign-off-content {
+  margin-top: 2em;
+}
+
+.sign-off-content p {
+  margin: 1em 0;
+}
+
+.signature-block {
+  margin: 3em 0 2em 0;
+}
+
+.signature-line {
+  width: 300px;
+  border-bottom: 2px solid #333;
+  margin-bottom: 0.5em;
+}
+
+.signature-label {
+  font-size: 10pt;
+  color: #666;
+  font-style: italic;
+}
+
+.attestation {
+  margin-top: 2em;
+  padding: 1em;
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 9pt;
+  line-height: 1.6;
+  color: #555;
+}
+
+/* Print Optimizations */
+@media print {
+  body {
+    background: white;
+  }
+  
+  section {
+    page-break-inside: avoid;
+  }
+  
+  .control-table {
+    page-break-inside: avoid;
+  }
+  
+  .control-table thead {
+    display: table-header-group;
+  }
+  
+  .nprm-control-block {
+    page-break-inside: avoid;
+  }
+}
+
+/* Screen Preview Styles */
+@media screen {
+  body {
+    background: #f5f5f5;
+    padding: 2em;
+  }
+  
+  section {
+    background: white;
+    padding: 2em;
+    margin-bottom: 2em;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-radius: 4px;
+  }
+}
+
+/* Made with Bob */
