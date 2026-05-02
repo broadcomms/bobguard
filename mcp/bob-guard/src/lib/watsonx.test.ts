@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { generateProse } from './watsonx';
 
-// Mock the watsonx SDK
+// Mock the watsonx SDK + the authenticator import
 vi.mock('@ibm-cloud/watsonx-ai', () => ({
   WatsonXAI: {
     newInstance: vi.fn(() => ({
-      textGeneration: vi.fn(async () => ({
+      generateText: vi.fn(async () => ({
         result: {
           results: [
             {
@@ -16,6 +16,10 @@ vi.mock('@ibm-cloud/watsonx-ai', () => ({
       })),
     })),
   },
+}));
+
+vi.mock('@ibm-cloud/watsonx-ai/authentication/index.js', () => ({
+  IamAuthenticator: vi.fn().mockImplementation((opts: { apikey: string }) => opts),
 }));
 
 describe('watsonx.generateProse', () => {
@@ -90,7 +94,7 @@ describe('watsonx.generateProse', () => {
   it('falls back to placeholder on API error', async () => {
     const { WatsonXAI } = await import('@ibm-cloud/watsonx-ai');
     vi.mocked(WatsonXAI.newInstance).mockReturnValueOnce({
-      textGeneration: vi.fn().mockRejectedValueOnce(new Error('API error')),
+      generateText: vi.fn().mockRejectedValueOnce(new Error('API error')),
     } as any);
 
     const result = await generateProse('executive_summary', {
@@ -103,7 +107,7 @@ describe('watsonx.generateProse', () => {
   it('falls back to placeholder on empty response', async () => {
     const { WatsonXAI } = await import('@ibm-cloud/watsonx-ai');
     vi.mocked(WatsonXAI.newInstance).mockReturnValueOnce({
-      textGeneration: vi.fn().mockResolvedValueOnce({
+      generateText: vi.fn().mockResolvedValueOnce({
         result: { results: [{ generated_text: '' }] },
       }),
     } as any);

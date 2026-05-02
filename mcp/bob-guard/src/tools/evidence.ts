@@ -2,7 +2,45 @@ import { readFileSync, writeFileSync, mkdirSync, unlinkSync } from 'fs';
 import { join, dirname } from 'path';
 import { execSync } from 'child_process';
 import puppeteer from 'puppeteer';
+import { marked } from 'marked';
 import { generateProse } from '../lib/watsonx.js';
+
+// Configure marked: GFM on, no HTML pass-through (sanitize via escape).
+marked.setOptions({ gfm: true, breaks: false });
+
+/**
+ * Render watsonx-generated markdown to HTML, then color-code severity
+ * keywords (Critical / High / Medium) by wrapping them in span classes
+ * the print stylesheet picks up.
+ */
+function renderProseMarkdown(md: string): string {
+  if (!md || md === '[watsonx.ai unavailable — placeholder]') {
+    return `<p class="prose-fallback"><em>${md || 'Section not generated.'}</em></p>`;
+  }
+  // Strip leading "---" runs and any accidental H1/H2 headings granite
+  // sometimes adds despite the prompt (the section title is template-rendered)
+  const cleaned = md
+    .replace(/^\s*-{3,}\s*$/gm, '')
+    .replace(/^\s*#{1,2}\s+.+$/gm, '')
+    .trim();
+  const html = marked.parse(cleaned) as string;
+  // Severity post-processing — wrap leading bold "Critical/High/Medium"
+  // tokens in colored spans. Only matches when the bold token is the WHOLE
+  // <strong> contents (not partial text), and only at the start of a list item.
+  return html
+    .replace(
+      /<li>\s*<strong>(Critical|CRITICAL)<\/strong>/g,
+      '<li><strong class="severity-critical">Critical</strong>'
+    )
+    .replace(
+      /<li>\s*<strong>(High|HIGH)<\/strong>/g,
+      '<li><strong class="severity-high">High</strong>'
+    )
+    .replace(
+      /<li>\s*<strong>(Medium|MEDIUM)<\/strong>/g,
+      '<li><strong class="severity-medium">Medium</strong>'
+    );
+}
 
 interface TriggeredControl {
   control_id: string;
@@ -193,12 +231,12 @@ export async function renderPdf(input: RenderPdfInput): Promise<RenderPdfOutput>
     audit_date: new Date().toISOString().split('T')[0],
     status,
     status_text: statusText,
-    executive_summary: executiveSummary,
+    executive_summary: renderProseMarkdown(executiveSummary),
     control_rows: controlRows,
     data_flow_diagram: dataFlowDiagram,
-    threat_delta_narrative: threatDeltaNarrative,
+    threat_delta_narrative: renderProseMarkdown(threatDeltaNarrative),
     test_evidence: testEvidence,
-    nprm_narrative,
+    nprm_narrative: renderProseMarkdown(nprm_narrative),
     nprm_control_blocks: nprm_control_blocks || '<p><em>No controls affected by 2024 NPRM</em></p>',
     governance_entry_id: 'pending',
     governance_status: 'pending',

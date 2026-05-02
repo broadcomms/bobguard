@@ -17,59 +17,77 @@ interface SectionContext {
 
 const FALLBACK_TEXT = '[watsonx.ai unavailable — placeholder]';
 
-// Prompt templates for each section (auditor tone, no AI/Bob/assistant references)
+// Prompt templates: each requests STRUCTURED MARKDOWN with H3 sub-headings,
+// bullet lists, and bold key terms. The PDF template adds the section H2,
+// so prompts must NOT restate the section title or include leading separators.
 const PROMPTS: Record<Section, (ctx: SectionContext) => string> = {
-  executive_summary: (ctx) => `You are a HIPAA compliance auditor writing an executive summary for a pull request audit.
+  executive_summary: (ctx) => `You are a HIPAA auditor. Produce an executive summary using EXACTLY this structure (markdown):
 
-PR Number: ${ctx.pr_number || 'N/A'}
-Repository: ${ctx.repo_name || 'N/A'}
-Triggered Controls: ${ctx.triggered_controls?.map(c => c.control_id).join(', ') || 'None'}
+### Audit Scope
+1-2 sentences naming the PR, the repository, and the controls reviewed.
 
-Write a concise 2-3 paragraph executive summary that:
-1. States the audit scope and PR context
-2. Summarizes the compliance findings (violations detected, severity levels)
-3. Provides a clear recommendation (approve, block, or conditional approval)
+### Findings Summary
+Bulleted list, one bullet per triggered control. Format each bullet as: **§{control_id} — {control_name}:** {one-sentence finding}.
 
-Use formal auditor language. Do not reference AI, Bob, or assistants. Write as if a human compliance officer produced this report.`,
+### Recommendation
+2-3 sentences with the audit decision (BLOCKED / APPROVED) and the immediate next steps.
 
-  threat_delta: (ctx) => `You are a HIPAA compliance auditor analyzing threat model changes introduced by a code change.
+Do NOT include an 'Executive Summary' heading — the template adds that. Do NOT use --- separators. Use formal auditor tone. Do not reference AI, Bob, or assistants.
 
-Threat Delta Context:
-${ctx.threat_delta || 'No threat delta provided'}
+Context:
+- PR Number: ${ctx.pr_number || 'N/A'}
+- Repository: ${ctx.repo_name || 'N/A'}
+- Triggered Controls: ${ctx.triggered_controls?.map(c => `${c.control_id} (${c.severity || 'unknown'})`).join(', ') || 'None'}`,
 
-Control Violations:
-${ctx.triggered_controls?.map(c => `- ${c.control_id} (${c.severity || 'unknown'})`).join('\n') || 'None'}
+  threat_delta: (ctx) => `You are a HIPAA auditor producing a NEW threat model delta from scratch, using ONLY the control violations listed below as input. You MUST output every sub-section. Do NOT abbreviate or summarize.
 
-Write a 2-3 paragraph threat model delta analysis that:
-1. Describes new attack vectors or vulnerabilities introduced
-2. Explains how these threats relate to the HIPAA controls violated
-3. Assesses the risk level and potential impact on ePHI
+Output format (markdown, EXACT structure):
 
-Use formal security auditor language. Do not reference AI, Bob, or assistants.`,
+### New Attack Surface
+2-3 sentences describing what attack vectors this PR introduces, given the violated controls below.
 
-  nprm_narrative: (ctx) => `You are a HIPAA compliance auditor explaining forward-compatibility with the 2024 HIPAA Security Rule NPRM.
+### Critical and High Risks
+A bulleted list. One bullet for EACH violated control. Format: **{Severity}** — {one-sentence description of the risk}, violating §{control_id}. Severity tokens MUST be one of: Critical, High, Medium.
 
-Affected Controls:
-${ctx.nprm_affected?.map(c => `- ${c.control_id}: ${c.nprm_proposal || 'No proposal details'}`).join('\n') || 'None'}
+### Recommended Mitigations
+A bulleted list. One bullet for EACH violated control. Format: §{control_id}: {one-sentence fix}.
 
-Write a 1-2 paragraph forward-compatibility narrative that:
-1. Explains which controls are affected by the 2024 NPRM proposed changes
-2. Notes that BobGuard already enforces the stricter proposed standards
-3. Uses conditional language ("the NPRM proposes", "would require") - never assert HIPAA already requires what is only proposed
+### Aggregate Risk Level
+One sentence stating the overall classification (CRITICAL / HIGH / MEDIUM) and the rationale.
 
-Use formal auditor language. Do not reference AI, Bob, or assistants.`,
+Hard rules:
+- Do NOT include a top-level heading (no H1, no H2). The four H3 sub-headings above are required.
+- Do NOT use --- separators.
+- Do NOT add a "Conclusion" or "Summary" section.
+- Do NOT reference AI, Bob, or assistants.
+- Severity-to-control mapping (treat as ground truth):
+  - 164.312(a)(2)(iv) Encryption: Critical
+  - 164.312(b) Audit Controls: High
+  - 164.312(d) Authentication: High
+  - 164.312(e)(1) Transmission Security: High
+  - 164.312(c)(1) Integrity: Medium
 
-  control_rationale: (ctx) => `You are a HIPAA compliance auditor explaining why a specific control was triggered.
+Violated controls (one bullet per control in your output):
+${ctx.triggered_controls?.map(c => `- ${c.control_id} (severity: ${c.severity || 'unknown'})`).join('\n') || 'None'}`,
 
-Control: ${ctx.triggered_controls?.[0]?.control_id || 'N/A'}
-Context: ${ctx.control_map || 'No context provided'}
+  nprm_narrative: (ctx) => `You are a HIPAA auditor. Produce a forward-compatibility narrative using EXACTLY this structure (markdown):
 
-Write a 1 paragraph rationale that:
-1. Explains what the control requires
-2. Describes how the code change violates this requirement
-3. States the compliance risk
+### Affected Controls
+Bulleted list. One bullet per affected control. Format: **§{control_id}:** {what the NPRM proposes}.
 
-Use formal auditor language. Do not reference AI, Bob, or assistants.`,
+### BobGuard Position
+2-3 sentences explaining that BobGuard already enforces the stricter proposed standard. Use conditional language for the NPRM ("would require", "the NPRM proposes") — never assert HIPAA already mandates what is only proposed.
+
+Do NOT include a top-level heading. Do NOT use --- separators. Do not reference AI, Bob, or assistants.
+
+Affected Controls Context:
+${ctx.nprm_affected?.map(c => `- ${c.control_id}: ${c.nprm_proposal || 'No proposal details'}`).join('\n') || 'None'}`,
+
+  control_rationale: (ctx) => `You are a HIPAA auditor. Produce a one-paragraph control rationale (markdown):
+
+A single 3-4 sentence paragraph explaining (a) what control **§${ctx.triggered_controls?.[0]?.control_id || 'N/A'}** requires, (b) how the code change violates it, and (c) the compliance risk. Do NOT add headings or bullets. Do NOT use --- separators. Use formal auditor tone.
+
+Context: ${ctx.control_map || 'No context provided'}`,
 };
 
 /**
@@ -103,8 +121,11 @@ export async function generateProse(section: Section, context: SectionContext): 
       modelId,
       projectId,
       parameters: {
-        max_new_tokens: 500,
-        temperature: 0.3, // Low temperature for consistent, formal output
+        // Structured-markdown output (multiple H3 sections + bullets) needs
+        // more headroom than free prose. 1500 covers exec summary and threat
+        // delta comfortably; cheaper sections finish well below the cap.
+        max_new_tokens: 1500,
+        temperature: 0.3,
         top_p: 0.9,
         repetition_penalty: 1.1,
       },
@@ -116,6 +137,10 @@ export async function generateProse(section: Section, context: SectionContext): 
     if (!generatedText) {
       console.warn(`[watsonx] Empty response for section: ${section} - using fallback`);
       return FALLBACK_TEXT;
+    }
+
+    if (process.env.WATSONX_DEBUG === '1') {
+      console.error(`\n--- [watsonx debug] section=${section} raw output:\n${generatedText}\n--- end ---\n`);
     }
 
     return generatedText;
