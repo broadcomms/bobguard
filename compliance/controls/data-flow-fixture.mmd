@@ -1,0 +1,43 @@
+graph TB
+    subgraph "External Systems"
+        Client[Client Application]
+        Webhook[External Webhook]
+    end
+
+    subgraph "API Layer"
+        Auth[Auth Middleware<br/>§164.312(d)]
+        Routes[Patient Routes<br/>§164.312(b)]
+        Messages[Message Routes<br/>§164.312(e)(1)]
+    end
+
+    subgraph "Data Layer"
+        DB[(PostgreSQL<br/>§164.312(a)(2)(iv))]
+        Audit[Audit Log<br/>§164.312(b)]
+        Crypto[PHI Crypto<br/>§164.312(a)(2)(iv)]
+    end
+
+    subgraph "Compliance Layer"
+        BobGuard[BobGuard MCP]
+        Watsonx[watsonx.governance]
+    end
+
+    Client -->|HTTPS| Auth
+    Auth -->|JWT verify| Routes
+    Routes -->|Read/Write| DB
+    Routes -.->|Should call| Audit
+    Routes -.->|Should use| Crypto
+    
+    Webhook -->|HTTP/HTTPS| Messages
+    Messages -->|Store| DB
+    Messages -.->|Missing TLS check| Routes
+
+    BobGuard -->|Scan diff| Routes
+    BobGuard -->|Register PR| Watsonx
+    
+    style Auth fill:#f9f,stroke:#333,stroke-width:2px
+    style Routes fill:#ff9,stroke:#333,stroke-width:2px
+    style Messages fill:#f99,stroke:#333,stroke-width:2px
+    style DB fill:#9f9,stroke:#333,stroke-width:2px
+    style Audit fill:#99f,stroke:#333,stroke-width:2px,stroke-dasharray: 5 5
+    style Crypto fill:#99f,stroke:#333,stroke-width:2px,stroke-dasharray: 5 5
+    style BobGuard fill:#9ff,stroke:#333,stroke-width:3px

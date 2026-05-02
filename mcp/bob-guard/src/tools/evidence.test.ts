@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderPdf } from './evidence.js';
-import { mkdirSync, rmSync, existsSync, statSync } from 'fs';
+import { mkdirSync, rmSync, existsSync, statSync, readFileSync } from 'fs';
 import { join } from 'path';
 
 // Mock watsonx to avoid real API calls
@@ -205,6 +205,73 @@ describe('evidence.renderPdf', () => {
 
     expect(existsSync(result.pdf_path)).toBe(true);
     expect(result.watsonx_used).toBe(true);
+  }, 30000);
+
+  it('renders Mermaid diagram when data_flow_mmd provided', async () => {
+    // Read the test fixture (path relative to project root, not mcp/bob-guard)
+    const fixturePath = join(process.cwd(), '../../compliance/controls/data-flow-fixture.mmd');
+    const mmdSource = readFileSync(fixturePath, 'utf-8');
+
+    const input = {
+      pr_number: 999,
+      repo_metadata: {
+        repo_name: 'bobguard',
+        branch: 'test-mermaid',
+        commit_sha: 'mermaid123',
+        author: 'test-author',
+      },
+      triggered_controls: [
+        {
+          control_id: '164.312(a)(2)(iv)',
+          control_name: 'Encryption',
+          severity: 'block',
+        },
+      ],
+      control_map_md: 'Test control map',
+      threat_delta_md: 'Test threat delta',
+      test_evidence_json: { test: 'data' },
+      nprm_narrative: 'Test NPRM narrative',
+      data_flow_mmd: mmdSource,
+    };
+
+    const result = await renderPdf(input);
+
+    // Verify PDF was created
+    expect(existsSync(result.pdf_path)).toBe(true);
+
+    // Verify PDF has reasonable size (should be larger with diagram)
+    const stats = statSync(result.pdf_path);
+    expect(stats.size).toBeGreaterThan(10000); // At least 10KB with diagram
+
+    // Verify page count is at least 7 (page count is estimated)
+    expect(result.page_count).toBeGreaterThanOrEqual(7);
+
+    // Note: We can't easily verify the diagram is embedded without parsing PDF,
+    // but the test confirms the rendering pipeline completes successfully
+  }, 30000);
+
+  it('falls back to placeholder when Mermaid rendering fails', async () => {
+    const input = {
+      pr_number: 999,
+      repo_metadata: {
+        repo_name: 'bobguard',
+        branch: 'test-fallback',
+        commit_sha: 'fallback123',
+        author: 'test-author',
+      },
+      triggered_controls: [],
+      control_map_md: '',
+      threat_delta_md: '',
+      test_evidence_json: {},
+      nprm_narrative: '',
+      data_flow_mmd: 'invalid mermaid syntax {{{', // Invalid syntax
+    };
+
+    const result = await renderPdf(input);
+
+    // Should still generate PDF with placeholder
+    expect(existsSync(result.pdf_path)).toBe(true);
+    expect(result.page_count).toBeGreaterThanOrEqual(2);
   }, 30000);
 });
 

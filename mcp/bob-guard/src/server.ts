@@ -242,6 +242,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               type: 'string',
               description: 'NPRM forward-compatibility narrative',
             },
+            data_flow_mmd: {
+              type: 'string',
+              description: 'Optional Mermaid diagram source for data flow visualization',
+            },
           },
           required: ['pr_number', 'repo_metadata', 'triggered_controls', 'control_map_md', 'threat_delta_md', 'test_evidence_json', 'nprm_narrative'],
         },

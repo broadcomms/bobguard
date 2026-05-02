@@ -1,5 +1,6 @@
-import { readFileSync, mkdirSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, unlinkSync } from 'fs';
 import { join, dirname } from 'path';
+import { execSync } from 'child_process';
 import puppeteer from 'puppeteer';
 import { generateProse } from '../lib/watsonx.js';
 
@@ -29,6 +30,7 @@ interface RenderPdfInput {
   threat_delta_md: string;
   test_evidence_json: Record<string, unknown>;
   nprm_narrative: string;
+  data_flow_mmd?: string; // Optional Mermaid diagram source
 }
 
 interface RenderPdfOutput {
@@ -44,6 +46,51 @@ const rootDir = join(dirname(new URL(import.meta.url).pathname), '../../../..');
 const PLACEHOLDER_DIAGRAM = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 
 /**
+ * Render Mermaid diagram to base64-encoded PNG
+ * Returns data URI or placeholder on failure
+ */
+async function renderMermaidDiagram(mmdSource: string): Promise<string> {
+  const tempDir = join(rootDir, 'mcp/bob-guard/renders');
+  mkdirSync(tempDir, { recursive: true });
+
+  const timestamp = Date.now();
+  const mmdPath = join(tempDir, `temp-${timestamp}.mmd`);
+  const pngPath = join(tempDir, `temp-${timestamp}.png`);
+
+  try {
+    // Write Mermaid source to temp file
+    writeFileSync(mmdPath, mmdSource, 'utf-8');
+
+    // Run mermaid-cli to generate PNG
+    execSync(
+      `npx -p @mermaid-js/mermaid-cli mmdc -i "${mmdPath}" -o "${pngPath}" --quiet`,
+      { cwd: rootDir, stdio: 'pipe' }
+    );
+
+    // Read PNG and convert to base64
+    const pngBuffer = readFileSync(pngPath);
+    const base64 = pngBuffer.toString('base64');
+
+    // Cleanup temp files
+    unlinkSync(mmdPath);
+    unlinkSync(pngPath);
+
+    return `data:image/png;base64,${base64}`;
+  } catch (error) {
+    // Cleanup on error
+    try {
+      unlinkSync(mmdPath);
+    } catch {}
+    try {
+      unlinkSync(pngPath);
+    } catch {}
+
+    console.error('Mermaid rendering failed:', error);
+    return PLACEHOLDER_DIAGRAM;
+  }
+}
+
+/**
  * Render audit pack PDF using Puppeteer + watsonx.ai prose generation
  */
 export async function renderPdf(input: RenderPdfInput): Promise<RenderPdfOutput> {
@@ -54,6 +101,7 @@ export async function renderPdf(input: RenderPdfInput): Promise<RenderPdfOutput>
     threat_delta_md,
     test_evidence_json,
     nprm_narrative,
+    data_flow_mmd,
   } = input;
 
   // Load templates
@@ -75,6 +123,11 @@ export async function renderPdf(input: RenderPdfInput): Promise<RenderPdfOutput>
     threat_delta: threat_delta_md,
     triggered_controls,
   });
+
+  // Render Mermaid diagram if provided
+  const dataFlowDiagram = data_flow_mmd
+    ? await renderMermaidDiagram(data_flow_mmd)
+    : PLACEHOLDER_DIAGRAM;
 
   // Determine status
   const hasBlockers = triggered_controls.some(c => c.severity === 'block');
@@ -120,7 +173,7 @@ export async function renderPdf(input: RenderPdfInput): Promise<RenderPdfOutput>
     status_text: statusText,
     executive_summary: executiveSummary,
     control_rows: controlRows,
-    data_flow_diagram: PLACEHOLDER_DIAGRAM,
+    data_flow_diagram: dataFlowDiagram,
     threat_delta_narrative: threatDeltaNarrative,
     test_evidence: testEvidence,
     nprm_narrative,
