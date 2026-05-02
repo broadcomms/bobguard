@@ -1,0 +1,34 @@
+{
+  "mode": "mocked",
+  "entry_id": "mock-6f23ac00-66cb-443b-a67e-58a2e8b4e5c2",
+  "payload": {
+    "pr_number": 1,
+    "controls": [
+      {
+        "control_id": "164.312(a)(2)(iv)",
+        "status": "violated"
+      },
+      {
+        "control_id": "164.312(b)",
+        "status": "violated"
+      },
+      {
+        "control_id": "164.312(d)",
+        "status": "violated"
+      },
+      {
+        "control_id": "164.312(e)(1)",
+        "status": "violated"
+      },
+      {
+        "control_id": "164.312(c)(1)",
+        "status": "warning"
+      }
+    ],
+    "status": "blocked",
+    "evidence_path": "compliance/evidence/PR-1/audit-pack.pdf",
+    "timestamp": "2026-05-02T01:37:38.328Z",
+    "repo": "unknown"
+  },
+  "timestamp": "2026-05-02T01:37:38.360Z"
+}

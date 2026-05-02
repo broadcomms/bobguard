@@ -1,0 +1,172 @@
+{
+  "pr_number": 1,
+  "test_suite": "HIPAA Compliance Validation",
+  "test_date": "2026-05-02T01:26:00Z",
+  "test_framework": "BobGuard Compliance Officer",
+  "total_tests": 12,
+  "passed": 0,
+  "failed": 12,
+  "skipped": 0,
+  "test_results": [
+    {
+      "test_id": "HIPAA-164.312(a)(2)(iv)-001",
+      "test_name": "Verify PHI field 'dob' is encrypted at rest",
+      "control_id": "164.312(a)(2)(iv)",
+      "status": "FAILED",
+      "severity": "CRITICAL",
+      "file": "src/prisma/schema.prisma",
+      "line": 26,
+      "expected": "Field 'dob' should use encrypted type or encryptAtRest() wrapper",
+      "actual": "Field 'dob' is plain String type",
+      "remediation": "Change schema to use encrypted field type or wrap with phi-crypto.encryptAtRest()"
+    },
+    {
+      "test_id": "HIPAA-164.312(a)(2)(iv)-002",
+      "test_name": "Verify PHI field 'mrn' is encrypted at rest",
+      "control_id": "164.312(a)(2)(iv)",
+      "status": "FAILED",
+      "severity": "CRITICAL",
+      "file": "src/prisma/schema.prisma",
+      "line": 27,
+      "expected": "Field 'mrn' should use encrypted type or encryptAtRest() wrapper",
+      "actual": "Field 'mrn' is plain String type",
+      "remediation": "Change schema to use encrypted field type or wrap with phi-crypto.encryptAtRest()"
+    },
+    {
+      "test_id": "HIPAA-164.312(a)(2)(iv)-003",
+      "test_name": "Verify PHI field 'ssn' is encrypted at rest",
+      "control_id": "164.312(a)(2)(iv)",
+      "status": "FAILED",
+      "severity": "CRITICAL",
+      "file": "src/prisma/schema.prisma",
+      "line": 28,
+      "expected": "Field 'ssn' should use encrypted type or encryptAtRest() wrapper",
+      "actual": "Field 'ssn' is plain String type",
+      "remediation": "Change schema to use encrypted field type or wrap with phi-crypto.encryptAtRest()"
+    },
+    {
+      "test_id": "HIPAA-164.312(a)(2)(iv)-004",
+      "test_name": "Verify PHI field 'notes' is encrypted at rest",
+      "control_id": "164.312(a)(2)(iv)",
+      "status": "FAILED",
+      "severity": "CRITICAL",
+      "file": "src/prisma/schema.prisma",
+      "line": 40,
+      "expected": "Field 'notes' should use encrypted type or encryptAtRest() wrapper",
+      "actual": "Field 'notes' is plain String type",
+      "remediation": "Change schema to use encrypted field type or wrap with phi-crypto.encryptAtRest()"
+    },
+    {
+      "test_id": "HIPAA-164.312(b)-001",
+      "test_name": "Verify POST /patients emits audit log",
+      "control_id": "164.312(b)",
+      "status": "FAILED",
+      "severity": "HIGH",
+      "file": "src/routes/patient.routes.ts",
+      "line": 31,
+      "expected": "Route should call audit.log() with action='CREATE'",
+      "actual": "No audit.log() call found in route handler",
+      "remediation": "Add audit.log({ actor: req.user.id, action: 'CREATE', resource: `Patient:${patient.id}`, outcome: 'SUCCESS' })"
+    },
+    {
+      "test_id": "HIPAA-164.312(b)-002",
+      "test_name": "Verify GET /patients/:id emits audit log",
+      "control_id": "164.312(b)",
+      "status": "FAILED",
+      "severity": "HIGH",
+      "file": "src/routes/patient.routes.ts",
+      "line": 74,
+      "expected": "Route should call audit.log() with action='READ'",
+      "actual": "No audit.log() call found in route handler",
+      "remediation": "Add audit.log({ actor: req.user.id, action: 'READ', resource: `Patient:${id}`, outcome: 'SUCCESS' })"
+    },
+    {
+      "test_id": "HIPAA-164.312(b)-003",
+      "test_name": "Verify GET /patients emits audit log",
+      "control_id": "164.312(b)",
+      "status": "FAILED",
+      "severity": "HIGH",
+      "file": "src/routes/patient.routes.ts",
+      "line": 103,
+      "expected": "Route should call audit.log() with action='LIST'",
+      "actual": "No audit.log() call found in route handler",
+      "remediation": "Add audit.log({ actor: req.user.id, action: 'LIST', resource: 'Patient', outcome: 'SUCCESS', metadata: { count: patients.length } })"
+    },
+    {
+      "test_id": "HIPAA-164.312(b)-004",
+      "test_name": "Verify PUT /patients/:id emits audit log",
+      "control_id": "164.312(b)",
+      "status": "FAILED",
+      "severity": "HIGH",
+      "file": "src/routes/patient.routes.ts",
+      "line": 142,
+      "expected": "Route should call audit.log() with action='UPDATE'",
+      "actual": "No audit.log() call found in route handler",
+      "remediation": "Add audit.log({ actor: req.user.id, action: 'UPDATE', resource: `Patient:${id}`, outcome: 'SUCCESS' })"
+    },
+    {
+      "test_id": "HIPAA-164.312(b)-005",
+      "test_name": "Verify DELETE /patients/:id emits audit log",
+      "control_id": "164.312(b)",
+      "status": "FAILED",
+      "severity": "HIGH",
+      "file": "src/routes/patient.routes.ts",
+      "line": 190,
+      "expected": "Route should call audit.log() with action='DELETE'",
+      "actual": "No audit.log() call found in route handler",
+      "remediation": "Add audit.log({ actor: req.user.id, action: 'DELETE', resource: `Patient:${id}`, outcome: 'SUCCESS' })"
+    },
+    {
+      "test_id": "HIPAA-164.312(d)-001",
+      "test_name": "Verify MFA is required after JWT verification",
+      "control_id": "164.312(d)",
+      "status": "FAILED",
+      "severity": "HIGH",
+      "file": "src/middleware/auth.middleware.ts",
+      "line": 43,
+      "expected": "Middleware should verify MFA token after JWT validation",
+      "actual": "Only JWT verification present, no MFA check",
+      "remediation": "Add MFA verification step: verify TOTP/WebAuthn token before calling next()"
+    },
+    {
+      "test_id": "HIPAA-164.312(e)(1)-001",
+      "test_name": "Verify /messages/inbound enforces TLS",
+      "control_id": "164.312(e)(1)",
+      "status": "FAILED",
+      "severity": "HIGH",
+      "file": "src/routes/message.routes.ts",
+      "line": 31,
+      "expected": "Route should reject non-HTTPS requests",
+      "actual": "No TLS enforcement check present",
+      "remediation": "Add middleware to verify req.protocol === 'https' or req.headers['x-forwarded-proto'] === 'https'"
+    },
+    {
+      "test_id": "HIPAA-164.312(c)(1)-001",
+      "test_name": "Verify patient deletion uses soft-delete",
+      "control_id": "164.312(c)(1)",
+      "status": "FAILED",
+      "severity": "MEDIUM",
+      "file": "src/routes/patient.routes.ts",
+      "line": 204,
+      "expected": "DELETE operation should use soft-delete with tombstone",
+      "actual": "Hard delete using prisma.patient.delete()",
+      "remediation": "Replace with soft-delete: prisma.patient.update({ where: { id }, data: { deletedAt: new Date(), deletedBy: req.user.id } })"
+    }
+  ],
+  "summary": {
+    "critical_failures": 4,
+    "high_failures": 7,
+    "medium_failures": 1,
+    "blocking_violations": 11,
+    "warnings": 1,
+    "compliance_status": "NON-COMPLIANT",
+    "recommendation": "BLOCK PR - All blocking violations must be remediated before merge"
+  },
+  "evidence_artifacts": [
+    "compliance/evidence/PR-1/refusal.md",
+    "compliance/evidence/PR-1/control-map.md",
+    "compliance/evidence/PR-1/threat-delta.md",
+    "compliance/evidence/PR-1/test-evidence.json",
+    "compliance/evidence/PR-1/audit-pack.pdf"
+  ]
+}
