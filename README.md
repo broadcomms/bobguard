@@ -45,23 +45,23 @@ See [`docs/BOB-USAGE.md`](docs/BOB-USAGE.md) for the full statement (forthcoming
 
 ## Quick start
 
-### Phase 2a: Scaffold (current)
-
 ```bash
 # 1. Clone and install dependencies
-git clone <repo-url>
+git clone https://github.com/broadcomms/bobguard.git
 cd bobguard
 npm install
 
 # 2. Set up environment
 cp .env.example .env
 # Edit .env: set DATABASE_URL, JWT_SECRET (min 32 chars), ENCRYPTION_KEY (64 hex chars)
+# Optional: add WATSONX_AI_KEY, WATSONX_AI_PROJECT_ID, WATSONX_AI_MODEL for live prose generation
 
 # 3. Start Postgres
 docker compose up -d
 
-# 4. Run Prisma migrations
+# 4. Run Prisma migrations and seed
 npm run prisma:migrate
+npm run prisma:seed
 
 # 5. Build and test
 npm run build
@@ -70,16 +70,23 @@ npm test
 # 6. Start dev server
 npm run dev
 # Visit http://localhost:3000/health
+
+# 7. Build and test the BobGuard MCP server
+cd mcp/bob-guard
+npm install
+npm run mcp:build
+npm test
+cd ../..
+
+# 8. Configure Bob IDE
+# Add mcp/bob-guard to Bob Settings → MCP
+# Restart Bob to load the Compliance Officer mode
+# Use /audit-pr in Compliance Officer mode to scan diffs
 ```
 
-### Phase 2b: Routes (forthcoming)
-Auth middleware + patient/encounter/message routes with deliberate HIPAA violations.
+## Demo asset
 
-### Phase 2c: Seed + Tests (forthcoming)
-Faker synthetic data + smoke tests.
-
-### Phase 3: BobGuard MCP + Compliance Officer audit (forthcoming)
-Custom MCP server + Compliance Officer mode catches all violations.
+**[Open compliance/evidence/PR-1/audit-pack.pdf](compliance/evidence/PR-1/audit-pack.pdf)** to see what BobGuard produces. No setup required.
 
 ## Repo map
 
@@ -109,10 +116,10 @@ LICENSE                           ← MIT
 - [x] `.bob/` Compliance Officer mode + skills + MCP config
 - [x] `compliance/controls/` populated (AuditGuardX 98 + BobGuard-extended 12 + NPRM overlay)
 - [x] `compliance/references/hhs/` populated (12 public-domain HHS PDFs, 4 MB)
-- [ ] `bob_sessions/` with all phase exports — **disqualifier if missing**
-- [ ] `src/` sample telehealth API (P2)
-- [ ] `mcp/bob-guard/` server (P3)
-- [ ] `compliance/evidence/PR-1/` example (P5)
+- [x] `bob_sessions/` with all phase exports (01-init through 05b-demo-asset-lock)
+- [x] `src/` sample telehealth API with deliberate HIPAA violations
+- [x] `mcp/bob-guard/` server (5 tools, 36 unit tests passing)
+- [x] `compliance/evidence/PR-1/` example committed as canonical demo asset
 - [ ] 3-minute demo video (P9)
 - [ ] 500-word problem/solution writeup (P8)
 - [ ] Bob/watsonx usage statement (P8)
