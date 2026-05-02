@@ -1,0 +1,56 @@
+diff --git a/src/prisma/schema.prisma b/src/prisma/schema.prisma
+new file mode 100644
+index 0000000..ef87776
+--- /dev/null
++++ b/src/prisma/schema.prisma
+@@ -0,0 +1,49 @@
++// This is your Prisma schema file,
++// learn more about it in the docs: https://pris.ly/d/prisma-schema
++
++generator client {
++  provider = "prisma-client-js"
++}
++
++datasource db {
++  provider = "postgresql"
++  url      = env("DATABASE_URL")
++}
++
++model User {
++  id        String   @id @default(cuid())
++  email     String   @unique
++  password  String
++  createdAt DateTime @default(now())
++  updatedAt DateTime @updatedAt
++
++  @@map("users")
++}
++
++model Patient {
++  id              String   @id @default(cuid())
++  name            String
++  dob             String   // ❌ DELIBERATE VIOLATION: Unencrypted PHI (§164.312(a)(2)(iv))
++  mrn             String   @unique // ❌ DELIBERATE VIOLATION: Unencrypted PHI (§164.312(a)(2)(iv))
++  ssn             String   // ❌ DELIBERATE VIOLATION: Unencrypted PHI (§164.312(a)(2)(iv))
++  encryptedFields Json?    // Metadata for "right answer" fix (unused in demo)
++  createdAt       DateTime @default(now())
++  updatedAt       DateTime @updatedAt
++
++  encounters Encounter[]
++
++  @@map("patients")
++}
++
++model Encounter {
++  id         String   @id @default(cuid())
++  patientId  String
++  providerId String
++  notes      String
++  createdAt  DateTime @default(now())
++  updatedAt  DateTime @updatedAt
++
++  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
++
++  @@map("encounters")
++}
+\ No newline at end of file

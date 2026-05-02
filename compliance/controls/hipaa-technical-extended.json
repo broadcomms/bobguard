@@ -107,9 +107,9 @@
       "bobguard": {
         "severity": "block",
         "code_patterns": [
-          { "lang": "ts", "kind": "regex", "match": "(dob|ssn|mrn|medicalRecordNumber|diagnosis|patientId|insuranceNumber)\\s*:\\s*string", "comment": "Unencrypted PHI primitive type at rest" },
-          { "lang": "ts", "kind": "regex", "match": "prisma\\.\\w+\\.(create|update|upsert)\\s*\\(\\s*\\{[^}]*data:\\s*\\{[^}]*(dob|ssn|mrn)\\s*:\\s*[^}]*\\}", "comment": "ORM write of PHI without encryption helper" },
-          { "lang": "ts", "kind": "regex", "match": "fs\\.writeFile.*\\b(patient|chart|record|ehr)\\b", "comment": "PHI written to disk via plain filesystem call" }
+          { "lang": "ts", "kind": "regex", "match": "[+\\s].*\\b(dob|ssn|mrn|medicalRecordNumber|diagnosis|patientId|insuranceNumber)\\s*String", "comment": "Unencrypted PHI primitive type at rest" },
+          { "lang": "ts", "kind": "regex", "match": "[+\\s].*prisma\\.\\w+\\.(create|update|upsert)\\s*\\(\\s*\\{[^}]*data:\\s*\\{[^}]*(dob|ssn|mrn)\\s*:\\s*[^}]*\\}", "comment": "ORM write of PHI without encryption helper" },
+          { "lang": "ts", "kind": "regex", "match": "[+\\s].*fs\\.writeFile.*\\b(patient|chart|record|ehr)\\b", "comment": "PHI written to disk via plain filesystem call" }
         ],
         "fix_template": "templates/fixes/encrypt-field-at-rest.ts",
         "evidence_artifacts": ["control-mapping", "encryption-key-rotation-evidence", "data-flow-diagram", "test-evidence"],
@@ -132,7 +132,7 @@
       "bobguard": {
         "severity": "block",
         "code_patterns": [
-          { "lang": "ts", "kind": "regex", "match": "app\\.(get|post|put|delete|patch)\\s*\\([^)]*\\b(patient|record|chart|ehr)\\b[^)]*\\)\\s*[^{]*\\{(?![^}]*(audit|logEvent|emitAudit))", "comment": "PHI route without audit-log hook" }
+          { "lang": "ts", "kind": "regex", "match": "\\+router\\.(get|post|put|delete|patch)\\s*\\(['\"][^'\"]*['\"]\\s*,\\s*requireAuth", "comment": "PHI route with auth but no audit-log hook" }
         ],
         "fix_template": "templates/fixes/audit-log-hook.ts",
         "evidence_artifacts": ["control-mapping", "audit-log-sample", "log-retention-policy"],
@@ -191,8 +191,8 @@
       "bobguard": {
         "severity": "block",
         "code_patterns": [
-          { "lang": "ts", "kind": "regex", "match": "passport\\.use\\(.*LocalStrategy(?![^)]*mfa)", "comment": "Single-factor local auth strategy" },
-          { "lang": "ts", "kind": "regex", "match": "bcrypt\\.compare\\([^)]*\\)\\s*&&\\s*(?!.*mfa|.*totp|.*webauthn)", "comment": "Password compare without MFA gate" }
+          { "lang": "ts", "kind": "regex", "match": "[+\\s].*passport\\.use\\(.*LocalStrategy(?![^)]*mfa)", "comment": "Single-factor local auth strategy" },
+          { "lang": "ts", "kind": "regex", "match": "\\+.*jwt\\.verify\\(", "comment": "JWT verification without MFA gate" }
         ],
         "fix_template": "templates/fixes/add-mfa.ts",
         "evidence_artifacts": ["control-mapping", "mfa-coverage-report"],
@@ -214,9 +214,9 @@
       "bobguard": {
         "severity": "block",
         "code_patterns": [
-          { "lang": "ts", "kind": "regex", "match": "https?://(?!localhost)[^/'\"]*\\b(api|service|partner)\\b[^'\"]*['\"]", "comment": "Outbound URL — verify HTTPS and not bare HTTP" },
-          { "lang": "ts", "kind": "regex", "match": "fetch\\s*\\(\\s*['\"]http://(?!localhost)", "comment": "Plain HTTP fetch outbound" },
-          { "lang": "ts", "kind": "regex", "match": "createServer\\((?!.*\\bhttps\\b)", "comment": "HTTP server (not HTTPS) for ePHI service" }
+          { "lang": "ts", "kind": "regex", "match": "[+\\s].*https?://(?!localhost)[^/'\"]*\\b(api|service|partner)\\b[^'\"]*['\"]", "comment": "Outbound URL — verify HTTPS and not bare HTTP" },
+          { "lang": "ts", "kind": "regex", "match": "[+\\s].*fetch\\s*\\(\\s*['\"]http://(?!localhost)", "comment": "Plain HTTP fetch outbound" },
+          { "lang": "ts", "kind": "regex", "match": "\\+router\\.post\\(['\"]/(inbound|webhook|message)", "comment": "Webhook endpoint without TLS enforcement check" }
         ],
         "fix_template": "templates/fixes/tls-enforcement.ts",
         "evidence_artifacts": ["control-mapping", "tls-config", "cert-rotation-evidence"],

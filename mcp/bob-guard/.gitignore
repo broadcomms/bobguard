@@ -1,0 +1,7 @@
+node_modules/
+dist/
+*.tmp.pdf
+*.log
+.DS_Store
+
+# Made with Bob
