@@ -9,6 +9,8 @@ import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { createControlsLookupTool, createControlsScanTool } from './tools/controls.js';
+import { createNPRMForwardCompatCheckTool } from './tools/nprm.js';
+import { createGovernanceRegisterPRTool } from './tools/governance.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -33,8 +35,13 @@ const hipaaExtendedControls = JSON.parse(
   readFileSync(join(CONTROLS_DIR, 'hipaa-technical-extended.json'), 'utf-8')
 );
 
+const nprm_overlay = JSON.parse(
+  readFileSync(join(CONTROLS_DIR, 'hipaa-2024-nprm-overlay.json'), 'utf-8')
+);
+
 console.error(`[bob-guard] Loaded ${hipaaControls.length} base controls`);
 console.error(`[bob-guard] Loaded ${hipaaExtendedControls.controls.length} extended controls`);
+console.error(`[bob-guard] Loaded NPRM overlay with ${nprm_overlay.proposed_changes.length} proposed changes`);
 
 // Merge extended controls with base controls
 // Extended controls have bobguard.* fields that augment the base
@@ -78,6 +85,8 @@ const server = new Server(
 // Register tools
 const controlsLookup = createControlsLookupTool(controlsMap);
 const controlsScan = createControlsScanTool(controlsMap);
+const nprm_forward_compat_check = createNPRMForwardCompatCheckTool(nprm_overlay, controlsMap);
+const governance_register_pr = createGovernanceRegisterPRTool();
 
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
@@ -115,6 +124,68 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['diff'],
         },
       },
+      {
+        name: 'nprm.forward_compat_check',
+        description: 'Checks if triggered controls are affected by the 2024 HIPAA Security Rule NPRM and returns forward-compatibility narratives.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            triggered_controls: {
+              type: 'array',
+              description: 'Array of triggered control objects',
+              items: {
+                type: 'object',
+                properties: {
+                  control_id: {
+                    type: 'string',
+                    description: 'HIPAA control ID',
+                  },
+                },
+                required: ['control_id'],
+              },
+            },
+          },
+          required: ['triggered_controls'],
+        },
+      },
+      {
+        name: 'governance.register_pr',
+        description: 'Registers PR compliance status with watsonx.governance. Falls back to local JSON file if API is unreachable.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            pr_number: {
+              type: 'number',
+              description: 'Pull request number',
+            },
+            controls: {
+              type: 'array',
+              description: 'Array of control status objects',
+              items: {
+                type: 'object',
+                properties: {
+                  control_id: {
+                    type: 'string',
+                  },
+                  status: {
+                    type: 'string',
+                  },
+                },
+              },
+            },
+            status: {
+              type: 'string',
+              enum: ['reviewed', 'approved', 'blocked'],
+              description: 'Overall PR status',
+            },
+            evidence_path: {
+              type: 'string',
+              description: 'Path to evidence PDF',
+            },
+          },
+          required: ['pr_number', 'controls', 'status', 'evidence_path'],
+        },
+      },
     ],
   };
 });
@@ -132,6 +203,19 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   if (name === 'controls.scan') {
     return controlsScan(args as { diff: string; lang?: string });
+  }
+
+  if (name === 'nprm.forward_compat_check') {
+    return nprm_forward_compat_check(args as { triggered_controls: Array<{ control_id: string }> });
+  }
+
+  if (name === 'governance.register_pr') {
+    return governance_register_pr(args as {
+      pr_number: number;
+      controls: Array<{ control_id: string; status: string }>;
+      status: 'reviewed' | 'approved' | 'blocked';
+      evidence_path: string;
+    });
   }
 
   throw new Error(`Unknown tool: ${name}`);
