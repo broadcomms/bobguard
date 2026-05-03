@@ -52,9 +52,9 @@ model Diagnosis {
   id          String   @id @default(uuid())
   patientId   String
   patient     Patient  @relation(fields: [patientId], references: [id])
-  diagnosis   String   // ❌ Unencrypted PHI - violates §164.312(a)(2)(iv)
-  icd10Code   String   // ❌ Unencrypted PHI - violates §164.312(a)(2)(iv)
-  notes       String?  // ❌ Unencrypted PHI - violates §164.312(a)(2)(iv)
+  diagnosis   String   
+  icd10Code   String   
+  notes       String?  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
