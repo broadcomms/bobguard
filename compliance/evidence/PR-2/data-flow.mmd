@@ -1,0 +1,49 @@
+graph TB
+    subgraph "Client Layer"
+        Client[Client Application]
+    end
+
+    subgraph "API Layer"
+        API[Express API Server]
+        AuthMW[Auth Middleware]
+    end
+
+    subgraph "Data Layer"
+        DB[(PostgreSQL Database)]
+        Patient[Patient Model]
+        Encounter[Encounter Model]
+        Diagnosis[Diagnosis Model - NEW]
+    end
+
+    subgraph "Security Layer"
+        PHICrypto[phi-crypto.ts]
+        AuditLog[Audit Logger]
+    end
+
+    Client -->|HTTPS| API
+    API --> AuthMW
+    AuthMW -->|JWT Validation| API
+    
+    API -->|Read/Write| Patient
+    API -->|Read/Write| Encounter
+    API -->|Read/Write| Diagnosis
+    
+    Patient -->|Encrypted Fields| DB
+    Encounter -->|Encrypted Fields| DB
+    Diagnosis -->|⚠️ UNENCRYPTED PHI| DB
+    
+    PHICrypto -.->|Should Encrypt| Diagnosis
+    API --> AuditLog
+    AuditLog -->|Audit Trail| DB
+
+    style Diagnosis fill:#ff6b6b,stroke:#c92a2a,stroke-width:3px
+    style PHICrypto fill:#51cf66,stroke:#2f9e44
+    style DB fill:#339af0,stroke:#1971c2
+
+    classDef violation fill:#ff6b6b,stroke:#c92a2a,stroke-width:3px
+    classDef compliant fill:#51cf66,stroke:#2f9e44
+    classDef database fill:#339af0,stroke:#1971c2
+
+    class Diagnosis violation
+    class PHICrypto compliant
+    class DB database

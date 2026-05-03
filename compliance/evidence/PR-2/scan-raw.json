@@ -1,0 +1,45 @@
+{
+  "findings": [
+    {
+      "control_id": "164.312(a)(2)(iv)",
+      "control_name": "Encryption and Decryption (Addressable)",
+      "file": "src/prisma/schema.prisma",
+      "line": 53,
+      "snippet": "+\n+model Diagnosis {\n+  id          String   @id @default(uuid())\n+  patientId   String\n+  patient     Patient  @relation(fields: [patientId], references: [id])\n+  diagnosis   String   \n+  icd10Code   String   ",
+      "severity": "block",
+      "code_pattern_comment": "Unencrypted PHI primitive type at rest"
+    },
+    {
+      "control_id": "164.312(a)(2)(iv)",
+      "control_name": "Encryption and Decryption (Addressable)",
+      "file": "src/prisma/schema.prisma",
+      "line": 55,
+      "snippet": "+  id          String   @id @default(uuid())\n+  patientId   String\n+  patient     Patient  @relation(fields: [patientId], references: [id])\n+  diagnosis   String   \n+  icd10Code   String   \n+  notes       String?  \n+  createdAt   DateTime @default(now())",
+      "severity": "block",
+      "code_pattern_comment": "Unencrypted PHI primitive type at rest"
+    },
+    {
+      "control_id": "164.312(a)(2)(iv)",
+      "control_name": "Encryption and Decryption (Addressable)",
+      "file": "src/prisma/schema.prisma",
+      "line": 56,
+      "snippet": "+  patientId   String\n+  patient     Patient  @relation(fields: [patientId], references: [id])\n+  diagnosis   String   \n+  icd10Code   String   \n+  notes       String?  \n+  createdAt   DateTime @default(now())\n+  updatedAt   DateTime @updatedAt",
+      "severity": "block",
+      "code_pattern_comment": "Unencrypted PHI primitive type at rest"
+    },
+    {
+      "control_id": "164.312(a)(2)(iv)",
+      "control_name": "Encryption and Decryption (Addressable)",
+      "file": "src/prisma/schema.prisma",
+      "line": 57,
+      "snippet": "+  patient     Patient  @relation(fields: [patientId], references: [id])\n+  diagnosis   String   \n+  icd10Code   String   \n+  notes       String?  \n+  createdAt   DateTime @default(now())\n+  updatedAt   DateTime @updatedAt\n }",
+      "severity": "block",
+      "code_pattern_comment": "Unencrypted PHI primitive type at rest"
+    }
+  ],
+  "total": 4,
+  "by_severity": {
+    "block": 4,
+    "warn": 0
+  }
+}

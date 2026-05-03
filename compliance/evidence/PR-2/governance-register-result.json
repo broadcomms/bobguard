@@ -1,0 +1,17 @@
+{
+  "mode": "live",
+  "entry_id": "live-ad3cedac-e968-49f7-9ad9-4a6dec58a532",
+  "ibm_governance_check": {
+    "status": "live",
+    "pr_number": 2,
+    "controls": [
+      {
+        "control_id": "164.312(a)(2)(iv)",
+        "status": "violated"
+      }
+    ],
+    "overall_status": "blocked",
+    "evidence_path": "compliance/evidence/PR-2/audit-pack.pdf",
+    "registered_at": "2026-05-03T03:13:18Z"
+  }
+}
