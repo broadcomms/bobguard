@@ -1,0 +1,88 @@
+{
+  "pr_number": 2,
+  "branch": "feat/add-diagnosis-field",
+  "commit_sha": "c845bdf32481bda3dd5a594e9c59da5437d1fc20",
+  "test_suite": "HIPAA Compliance Test Suite",
+  "test_run_date": "2026-05-03T03:08:27Z",
+  "test_results": {
+    "encryption_at_rest": {
+      "test_name": "Verify PHI fields are encrypted at rest",
+      "status": "FAILED",
+      "failures": [
+        {
+          "model": "Diagnosis",
+          "field": "diagnosis",
+          "type": "String",
+          "expected": "Encrypted using encryptAtRest()",
+          "actual": "Plaintext String primitive",
+          "control_violated": "164.312(a)(2)(iv)"
+        },
+        {
+          "model": "Diagnosis",
+          "field": "icd10Code",
+          "type": "String",
+          "expected": "Encrypted using encryptAtRest()",
+          "actual": "Plaintext String primitive",
+          "control_violated": "164.312(a)(2)(iv)"
+        },
+        {
+          "model": "Diagnosis",
+          "field": "notes",
+          "type": "String?",
+          "expected": "Encrypted using encryptAtRest()",
+          "actual": "Plaintext String primitive",
+          "control_violated": "164.312(a)(2)(iv)"
+        }
+      ],
+      "failure_count": 3,
+      "pass_count": 0
+    },
+    "audit_logging": {
+      "test_name": "Verify audit trail for PHI access",
+      "status": "NOT_TESTED",
+      "reason": "No routes or controllers implemented yet for Diagnosis model"
+    },
+    "access_controls": {
+      "test_name": "Verify role-based access to diagnosis data",
+      "status": "NOT_TESTED",
+      "reason": "No routes or controllers implemented yet for Diagnosis model"
+    }
+  },
+  "summary": {
+    "total_tests": 3,
+    "passed": 0,
+    "failed": 1,
+    "not_tested": 2,
+    "blocking_failures": 1,
+    "compliance_status": "NON_COMPLIANT"
+  },
+  "remediation_required": [
+    {
+      "control_id": "164.312(a)(2)(iv)",
+      "action": "Encrypt Diagnosis.diagnosis field using encryptAtRest()",
+      "file": "src/prisma/schema.prisma",
+      "line": 55
+    },
+    {
+      "control_id": "164.312(a)(2)(iv)",
+      "action": "Encrypt Diagnosis.icd10Code field using encryptAtRest()",
+      "file": "src/prisma/schema.prisma",
+      "line": 56
+    },
+    {
+      "control_id": "164.312(a)(2)(iv)",
+      "action": "Encrypt Diagnosis.notes field using encryptAtRest()",
+      "file": "src/prisma/schema.prisma",
+      "line": 57
+    }
+  ],
+  "evidence_artifacts": [
+    "scan-raw.json",
+    "refusal.md",
+    "control-map.md",
+    "data-flow.mmd",
+    "threat-delta.md",
+    "test-evidence.json",
+    "audit-pack.pdf"
+  ]
+}
