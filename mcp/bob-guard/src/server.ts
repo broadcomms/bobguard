@@ -14,8 +14,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Load .env from the repo root so WATSONX_AI_KEY etc. are available to tool handlers.
-// Path: <repoRoot>/mcp/bob-guard/dist/server.js → ../../../../.env
-loadDotenv({ path: join(__dirname, '../../../../.env') });
+// __dirname is mcp/bob-guard/dist/  →  ../../../  is the repo root.
+loadDotenv({ path: join(__dirname, '../../../.env') });
 
 import { createControlsLookupTool, createControlsScanTool } from './tools/controls.js';
 import { createNPRMForwardCompatCheckTool } from './tools/nprm.js';

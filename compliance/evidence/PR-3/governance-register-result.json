@@ -1,0 +1,42 @@
+{
+  "mode": "live",
+  "entry_id": "live-b1ce4a69-f0b8-4836-85c6-7bfe0b9d0ba6",
+  "payload": {
+    "pr_number": 3,
+    "controls": [
+      {
+        "control_id": "164.312(a)(1)",
+        "status": "blocked"
+      },
+      {
+        "control_id": "164.312(a)(2)(iv)",
+        "status": "blocked"
+      },
+      {
+        "control_id": "164.312(d)",
+        "status": "blocked"
+      },
+      {
+        "control_id": "164.312(e)(1)",
+        "status": "blocked"
+      },
+      {
+        "control_id": "164.312(c)(1)",
+        "status": "warning"
+      }
+    ],
+    "status": "blocked",
+    "evidence_path": "compliance/evidence/PR-3/audit-pack.pdf",
+    "timestamp": "2026-05-03T04:17:11.770Z",
+    "repo": "unknown"
+  },
+  "ibm_governance_check": {
+    "url": "https://api.aiopenscale.cloud.ibm.com/openscale/3ff0701a-8687-4ecd-84f7-bb7e9b1e4655/v2/subscriptions",
+    "instance_id": "3ff0701a-8687-4ecd-84f7-bb7e9b1e4655",
+    "iam_authenticated": true,
+    "http_status": 200,
+    "resource_count": 0,
+    "checked_at": "2026-05-03T04:17:13.042Z"
+  },
+  "timestamp": "2026-05-03T04:17:13.045Z"
+}

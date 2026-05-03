@@ -64,3 +64,5 @@ mcp/bob-guard/renders/
 *.tmp.pdf
 
 PHASE-NOTES.md
+
+*.md

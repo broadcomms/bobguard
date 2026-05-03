@@ -92,10 +92,38 @@ open compliance/evidence/PR-1/audit-pack.pdf
 # 8. Configure Bob IDE
 # Add mcp/bob-guard to Bob Settings → MCP
 # Restart Bob to load the Compliance Officer mode
-# Use /audit-pr in Compliance Officer mode to scan diffs
+# Test /audit-pr in Compliance Officer mode to scan diffs
+   # If you are on the main brand, 
+   # Bob will tell it "Cannot audit main itself"
+   # Create a feature branch, check it make changes then run /audit-pr" from the branch.
+
+# 9. Create feature branch: 
+# Get back to main
+git checkout main
+
+# Create feature branch and make changes
+git checkout -b feature/my-feature
+# Or check into a feature branch (Recommended already on PR-N)
+git checkout -b feat/add-diagnosis-routes # new branch for PR-(N+1)
+
+# We will add a diagnostic route that deliberately
+```
+  - registers app.get('/api/patient/:id/diagnoses', ...) without requireAuth → §164.312(a)(1) block
+  - does prisma.diagnosis.create({ data: { diagnosis: ... } }) without encryptAtRest → §164.312(a)(2)(iv) block (the
+   ORM-write pattern, distinct from the schema-field pattern)
+  - does prisma.patient.delete( → §164.312(c)(1) warn (hard delete)
+  - does fetch('http://insurance-partner.example/...') → §164.312(e)(1) block (plain HTTP outbound)
+  - does jwt.verify(token) with no MFA gate → §164.312(d) block (single-factor auth)
+
+That gives a 5-violation, 4-control, mixed-severity demo that exercises every catalog pattern PR-2 didn't touch — and produces a much richer auditor PDF (multiple control families, both block and warn, plus NPRM forward-compat callouts).
+
+```sh
+  # The run /audit-pr" command in the chat panel
+  # Check into feature branch and make changes
 
 
-# 9. Swith to Compliance Officer mode (In Bob Chat)
+
+# 10. Swith to Compliance Officer mode (In Bob Chat)
 # Mode: Compliance Officer
 # MCP Panel: bob-guard shows green
 # MCP Panel tools: show all 5 tools
@@ -104,10 +132,57 @@ open compliance/evidence/PR-1/audit-pack.pdf
 # 10. Open Prisma Exhibit
 # In Bob Editor src/prisma/schema.prisma (the file with the deliberate dob/mrn/ssn violations) — this is "exhibit A" diff
 
+
+
 # 11. Open Bob chat panel
 # Select: "Compliance Officer"
-# Type the command: "/audit-pr"
-# Click "Open"
+# Type the command: "/audit-pr" and hit enter
+
+# Bob identifies violations in the Prisma schema.prisma file.
+# Bob responds with the refusal.
+  # citations like §164.312(a)(2)(iv) — Encryption and Decryption: Unencrypted PHI field 'dob'
+  # Scroll down to see the proposed fix.
+
+
+# 12. Finder window pinned to compliance/envidence/PR-1/ shows the artifacts
+# audit-pack.pdf, control-map.md, data-flow.md, threat-delta.md, test-evidence.json, governance-register-result.json, refusal.md.
+
+# Open and verify governance-register-result.json in editor
+# Open and verify audit-pack.pdf in editor
+# Scroll through the PDF report
+  # - Coverpage 
+  # - Executive summary
+  # - Control mapping table
+  # - Data flow diagram
+  # - Threat Model Delta
+  # - Test Evidence
+  # - NPRM Forward-Compat 
+  # - Sign-off with governance entry ID
+
+# 13. Delete the PR-2 folder to start clean fun
+cd /Users/patrickndille/bobguard
+rm -rf compliance/evidence/PR-2
+rm -f bob_sessions/audit-pr-PR-2.md
+
+# 14. How to verify run works
+# After bob completes the new /audit-pr
+
+# a. governance — should show mode: "live", not mocked
+cat compliance/evidence/PR-2/governance-register-result.json | python3 -m json.tool | head -15
+# Look for: "mode": "live", "iam_authenticated": true, "http_status": 200
+
+# b. PDF cover should show PR-2, branch=feat/add-patient-diagnosis, commit=c9a753b
+# Open it and check page 1 metadata block
+
+# c. controls scan — diagnosis should be in the findings list
+grep -i diagnosis compliance/evidence/PR-2/refusal.md
+
+# d. PDF should have a real exec summary, NOT [watsonx.ai unavailable — placeholder]
+# Open it and check page 2
+
+# f. Data flow diagram should render (page 4)
+ls compliance/evidence/PR-2/data-flow.mmd  # the source file should exist
+
 
 ```
 

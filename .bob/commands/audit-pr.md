@@ -8,6 +8,22 @@ mode: compliance-officer
 
 Run the full BobGuard compliance audit pipeline on the diff between the current branch and `main`. This command should only be invoked from inside the `Compliance Officer` mode.
 
+## Hard rules — DO NOT VIOLATE
+
+These rules exist because audit packs may end up in front of regulators. They override convenience.
+
+1. **Do NOT use sample fixtures or simulated diffs.** Every audit MUST run against the live `git diff main...HEAD` output for the current working branch. Fixtures under `mcp/bob-guard/src/tools/__fixtures__/` are for unit tests only; never for `/audit-pr`.
+2. **Do NOT handcraft any artifact in `compliance/evidence/PR-{N}/`.** Every file in that directory MUST be the verbatim output of an MCP tool call. If a tool fails, write a real fallback (per the failure modes below) — never a synthetic JSON or markdown the model wrote itself.
+3. **Do NOT skip `bob-guard.governance.register_pr`.** Even if you believe the API will be unavailable, you must call the tool and let it perform its own IAM exchange + liveness check. The tool's own fallback to `mode: "mocked"` is honest; a model-written fake entry is not.
+4. **Do NOT pre-fill metadata.** `pr_number`, `branch`, `commit_sha`, `author` MUST come from real `git` calls and the GitHub MCP, not from defaults or memory.
+5. **Do NOT decide clean-vs-blocked before persisting `scan-raw.json`.** The very first artifact written to `compliance/evidence/PR-{N}/` MUST be `scan-raw.json` — the verbatim text content of the `controls.scan` tool response, byte-for-byte. No reformatting, no summarization. Every downstream artifact (`refusal.md`, `clean.md`, `control-map.md`) must derive its findings list from that file. If `scan-raw.json` and the narrative artifacts disagree, the narrative is wrong by definition. This rule exists because PR-3 was caught with a model-narrated `clean.md` that contradicted the actual scan output.
+6. **Some MCP tools own their output files. DO NOT `write_to_file` over them.** Specifically:
+   - `bob-guard.governance.register_pr` itself writes `compliance/evidence/PR-{N}/governance-register-result.json` to disk with the full `mode`/`entry_id`/`payload`/`ibm_governance_check`/`timestamp` shape. The tool's response to the model is intentionally minimal (`{ entry_id, status }`) — that is NOT what belongs in the file. Reading the minimal response and then writing your own expanded version overwrites the tool's auditable IAM/OpenScale proof with a fabricated stub. This actually happened on PR-2.
+   - `bob-guard.evidence.render_pdf` itself writes `audit-pack.pdf`. Do not overwrite.
+   After calling a tool that owns its file, **read the file from disk** to confirm shape — do not write to it.
+
+If any tool errors, surface the error verbatim and follow the failure-mode entry below — do not paper over it.
+
 ## Procedure
 
 You are now operating as the Compliance Officer (see `.bob/modes/compliance-officer.yaml`).
@@ -65,16 +81,23 @@ Save the full transcript of this `/audit-pr` run to `bob_sessions/audit-pr-PR-{N
 ## Quality gates
 
 The command is complete only when:
-- [ ] All 5 evidence files exist in `compliance/evidence/PR-{N}/`.
+- [ ] `compliance/evidence/PR-{N}/scan-raw.json` exists and parses, and was written **before** any narrative artifact. It must contain the keys `findings`, `total`, and `by_severity` (the verbatim shape of `controls.scan` output). If it does not, the audit is invalid.
+- [ ] `clean.md` exists if-and-only-if `scan-raw.json` has `total == 0`. `refusal.md` exists if-and-only-if `scan-raw.json` has `by_severity.block > 0`. Any disagreement between `scan-raw.json` and the narrative artifacts means the narrative was fabricated.
+- [ ] All 5 evidence files exist in `compliance/evidence/PR-{N}/` (skip when `scan-raw.json.total == 0`; in that case only `scan-raw.json` + `clean.md` are required).
 - [ ] `audit-pack.pdf` is ≥2 pages and renders without layout errors.
 - [ ] PR review posted on GitHub with `REQUEST_CHANGES` (if blocking) or `COMMENT` (if only warnings).
 - [ ] Follow-up PR opened.
 - [ ] Bob session exported to `bob_sessions/`.
-- [ ] watsonx.governance entry registered (or local mock if API unavailable, with fallback documented in the PDF).
+- [ ] `bob-guard.governance.register_pr` was actually invoked, and the resulting `governance-register-result.json` matches one of the two valid shapes:
+  - Live: `{ "mode": "live", "entry_id": "live-...", "ibm_governance_check": {...} }`
+  - Mocked: `{ "mode": "mocked", "entry_id": "mock-...", "payload": {...} }`
+  Any other shape (e.g. top-level `pr_number`, top-level `status: "mocked"`, free-form `note`) means the file was handcrafted instead of tool-generated — that's a failure, not a pass.
 
 ## Failure modes
 
-- **No diff** → "Branch has no changes against main." Halt.
+- **On `main`** → Halt with "Cannot audit `main` against itself. Switch to a feature branch." Do NOT create a demo branch with synthetic violations.
+- **No diff** → Halt with "Branch has no changes against main."
 - **No controls triggered** → Write `compliance/evidence/PR-{N}/clean.md` with "No HIPAA controls triggered. PR is compliant." Post a `COMMENT` review with the same. Skip steps 5–6.
 - **MCP unavailable** → Halt with "bob-guard MCP not running. Run `npm run mcp:dev` and retry."
-- **Watsonx.ai unavailable** → Generate evidence with placeholder prose marked `[watsonx.ai unavailable — placeholder]`. Continue.
+- **Watsonx.ai unavailable** → The `evidence.render_pdf` tool will already substitute the `[watsonx.ai unavailable — placeholder]` string into the PDF. Do NOT add it to other artifacts manually.
+- **GitHub MCP unauthenticated** → Skip steps 4 and 5 (PR review + follow-up PR), continue with everything else. Do NOT invent a PR number — pick the next free integer by inspecting `compliance/evidence/PR-*/` directories.

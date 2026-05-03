@@ -1,0 +1,28 @@
+graph TB
+    Client[Client Application]
+    API[Diagnosis Routes API]
+    Auth[JWT Verification]
+    DB[(PostgreSQL Database)]
+    Partner[Insurance Partner API]
+    
+    Client -->|HTTP Request| API
+    API -->|Bearer Token| Auth
+    Auth -->|Verify JWT| API
+    API -->|Read/Write PHI| DB
+    API -->|Plain HTTP| Partner
+    
+    style API fill:#ff6b6b
+    style Auth fill:#ff6b6b
+    style DB fill:#ff6b6b
+    style Partner fill:#ff6b6b
+    
+    classDef violation fill:#ff6b6b,stroke:#c92a2a,stroke-width:3px
+    class API,Auth,DB,Partner violation
+    
+    subgraph "HIPAA Violations"
+        V1[§164.312 a 1 - No RBAC middleware]
+        V2[§164.312 a 2 iv - No encryption at rest]
+        V3[§164.312 d - Single-factor auth]
+        V4[§164.312 e 1 - Plain HTTP transmission]
+        V5[§164.312 c 1 - Hard delete without retention]
+    end

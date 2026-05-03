@@ -1,0 +1,81 @@
+{
+  "findings": [
+    {
+      "control_id": "164.312(a)(1)",
+      "control_name": "Access Control",
+      "file": "src/routes/diagnosis.routes.ts",
+      "line": 28,
+      "snippet": "+const prisma = new PrismaClient();\n+\n+router.get('/list', async (req, res) => {\n+  const all = await prisma.diagnosis.findMany({\n+    take: 50,\n+  });\n+  res.json(all);",
+      "severity": "block",
+      "code_pattern_comment": "Direct ORM access to PHI without RBAC check"
+    },
+    {
+      "control_id": "164.312(a)(1)",
+      "control_name": "Access Control",
+      "file": "src/routes/diagnosis.routes.ts",
+      "line": 35,
+      "snippet": "+});\n+\n+router.post('/', async (req, res) => {\n+  const token = (req.headers.authorization ?? '').replace('Bearer ', '');\n+  const claims = jwt.verify(token, env.JWT_SECRET);\n+\n+  const created = await prisma.diagnosis.create({",
+      "severity": "block",
+      "code_pattern_comment": "Direct ORM access to PHI without RBAC check"
+    },
+    {
+      "control_id": "164.312(a)(1)",
+      "control_name": "Access Control",
+      "file": "src/routes/diagnosis.routes.ts",
+      "line": 51,
+      "snippet": "+});\n+\n+router.delete('/:id', async (req, res) => {\n+  await prisma.diagnosis.delete({\n+    where: { id: req.params.id },\n+  });\n+  res.status(204).send();",
+      "severity": "block",
+      "code_pattern_comment": "Direct ORM access to PHI without RBAC check"
+    },
+    {
+      "control_id": "164.312(a)(2)(iv)",
+      "control_name": "Encryption and Decryption (Addressable)",
+      "file": "src/routes/diagnosis.routes.ts",
+      "line": 38,
+      "snippet": "+  const token = (req.headers.authorization ?? '').replace('Bearer ', '');\n+  const claims = jwt.verify(token, env.JWT_SECRET);\n+\n+  const created = await prisma.diagnosis.create({\n+    data: {\n+      patientId: req.body.patientId,\n+      diagnosis: req.body.diagnosis,",
+      "severity": "block",
+      "code_pattern_comment": "ORM write of PHI without encryption helper"
+    },
+    {
+      "control_id": "164.312(d)",
+      "control_name": "Person or Entity Authentication",
+      "file": "src/routes/diagnosis.routes.ts",
+      "line": 37,
+      "snippet": "+router.post('/', async (req, res) => {\n+  const token = (req.headers.authorization ?? '').replace('Bearer ', '');\n+  const claims = jwt.verify(token, env.JWT_SECRET);\n+\n+  const created = await prisma.diagnosis.create({\n+    data: {\n+      patientId: req.body.patientId,",
+      "severity": "block",
+      "code_pattern_comment": "JWT verification without MFA gate"
+    },
+    {
+      "control_id": "164.312(e)(1)",
+      "control_name": "Transmission Security",
+      "file": "src/routes/diagnosis.routes.ts",
+      "line": 58,
+      "snippet": "+});\n+\n+router.post('/:id/verify-insurance', async (req, res) => {\n+  const response = await fetch('http://insurance-partner.example/api/verify', {\n+    method: 'POST',\n+    body: JSON.stringify({ diagnosisId: req.params.id, mrn: req.body.mrn }),\n+  });",
+      "severity": "block",
+      "code_pattern_comment": "Outbound URL — verify HTTPS and not bare HTTP"
+    },
+    {
+      "control_id": "164.312(e)(1)",
+      "control_name": "Transmission Security",
+      "file": "src/routes/diagnosis.routes.ts",
+      "line": 58,
+      "snippet": "+});\n+\n+router.post('/:id/verify-insurance', async (req, res) => {\n+  const response = await fetch('http://insurance-partner.example/api/verify', {\n+    method: 'POST',\n+    body: JSON.stringify({ diagnosisId: req.params.id, mrn: req.body.mrn }),\n+  });",
+      "severity": "block",
+      "code_pattern_comment": "Plain HTTP fetch outbound"
+    },
+    {
+      "control_id": "164.312(c)(1)",
+      "control_name": "Integrity",
+      "file": "src/routes/diagnosis.routes.ts",
+      "line": 52,
+      "snippet": "+\n+router.delete('/:id', async (req, res) => {\n+  await prisma.diagnosis.delete({\n+    where: { id: req.params.id },\n+  });\n+  res.status(204).send();\n+});",
+      "severity": "warn",
+      "code_pattern_comment": "Hard delete of records — review for ePHI"
+    }
+  ],
+  "total": 8,
+  "by_severity": {
+    "block": 7,
+    "warn": 1
+  }
+}

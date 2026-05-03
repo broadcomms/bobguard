@@ -1,0 +1,131 @@
+{
+  "pr_number": 3,
+  "branch": "feat/add-diagnosis-routes",
+  "commit_sha": "64912840dcd1b0dc843a9b9a550e794ff00f6bda",
+  "test_suite": "BobGuard HIPAA Compliance Scan",
+  "test_date": "2026-05-03T04:00:00Z",
+  "test_results": {
+    "total_tests": 8,
+    "passed": 0,
+    "failed": 8,
+    "skipped": 0
+  },
+  "test_cases": [
+    {
+      "test_id": "164.312(a)(1)-001",
+      "control_id": "164.312(a)(1)",
+      "control_name": "Access Control",
+      "test_name": "Verify RBAC middleware on PHI read endpoint",
+      "file": "src/routes/diagnosis.routes.ts",
+      "line": 28,
+      "status": "FAILED",
+      "severity": "block",
+      "finding": "Direct ORM access to PHI without RBAC check",
+      "evidence": "Route handler `router.get('/list', ...)` at line 28 exposes `prisma.diagnosis.findMany()` without authentication middleware. No `requireAuth` wrapper detected.",
+      "remediation": "Wrap route handler with `requireAuth` middleware and verify `diagnosis:read` permission."
+    },
+    {
+      "test_id": "164.312(a)(1)-002",
+      "control_id": "164.312(a)(1)",
+      "control_name": "Access Control",
+      "test_name": "Verify RBAC middleware on PHI write endpoint",
+      "file": "src/routes/diagnosis.routes.ts",
+      "line": 35,
+      "status": "FAILED",
+      "severity": "block",
+      "finding": "Direct ORM access to PHI without RBAC check",
+      "evidence": "Route handler `router.post('/', ...)` at line 35 exposes `prisma.diagnosis.create()` without authentication middleware. No `requireAuth` wrapper detected.",
+      "remediation": "Wrap route handler with `requireAuth` middleware and verify `diagnosis:write` permission."
+    },
+    {
+      "test_id": "164.312(a)(1)-003",
+      "control_id": "164.312(a)(1)",
+      "control_name": "Access Control",
+      "test_name": "Verify RBAC middleware on PHI delete endpoint",
+      "file": "src/routes/diagnosis.routes.ts",
+      "line": 51,
+      "status": "FAILED",
+      "severity": "block",
+      "finding": "Direct ORM access to PHI without RBAC check",
+      "evidence": "Route handler `router.delete('/:id', ...)` at line 51 exposes `prisma.diagnosis.delete()` without authentication middleware. No `requireAuth` wrapper detected.",
+      "remediation": "Wrap route handler with `requireAuth` middleware and verify `diagnosis:delete` permission."
+    },
+    {
+      "test_id": "164.312(a)(2)(iv)-001",
+      "control_id": "164.312(a)(2)(iv)",
+      "control_name": "Encryption and Decryption (Addressable)",
+      "test_name": "Verify encryption at rest for PHI fields",
+      "file": "src/routes/diagnosis.routes.ts",
+      "line": 38,
+      "status": "FAILED",
+      "severity": "block",
+      "finding": "ORM write of PHI without encryption helper",
+      "evidence": "Route handler at line 38 writes PHI fields (`diagnosis`, `icd10Code`, `notes`) directly to database without `encryptAtRest()` wrapper.",
+      "remediation": "Wrap all PHI fields with `encryptAtRest()` from `src/lib/phi-crypto.ts` before database write."
+    },
+    {
+      "test_id": "164.312(d)-001",
+      "control_id": "164.312(d)",
+      "control_name": "Person or Entity Authentication",
+      "test_name": "Verify multi-factor authentication on PHI access",
+      "file": "src/routes/diagnosis.routes.ts",
+      "line": 37,
+      "status": "FAILED",
+      "severity": "block",
+      "finding": "JWT verification without MFA gate",
+      "evidence": "Route handler at line 37 verifies JWT token via `jwt.verify()` but does not enforce multi-factor authentication. No MFA gate detected.",
+      "remediation": "Gate verified JWT behind MFA factor (TOTP / WebAuthn). Verify second factor within session window."
+    },
+    {
+      "test_id": "164.312(e)(1)-001",
+      "control_id": "164.312(e)(1)",
+      "control_name": "Transmission Security",
+      "test_name": "Verify HTTPS for outbound PHI transmission",
+      "file": "src/routes/diagnosis.routes.ts",
+      "line": 58,
+      "status": "FAILED",
+      "severity": "block",
+      "finding": "Plain HTTP fetch outbound",
+      "evidence": "Route handler at line 58 transmits PHI to `http://insurance-partner.example/api/verify` over plain HTTP. No TLS encryption detected.",
+      "remediation": "Replace `http://` with `https://` and pin partner certificate. Implement mutual TLS (mTLS)."
+    },
+    {
+      "test_id": "164.312(e)(1)-002",
+      "control_id": "164.312(e)(1)",
+      "control_name": "Transmission Security",
+      "test_name": "Verify HTTPS protocol for outbound URLs",
+      "file": "src/routes/diagnosis.routes.ts",
+      "line": 58,
+      "status": "FAILED",
+      "severity": "block",
+      "finding": "Outbound URL — verify HTTPS and not bare HTTP",
+      "evidence": "Route handler at line 58 uses `http://` protocol for outbound fetch to insurance partner API.",
+      "remediation": "Replace `http://` with `https://` and pin partner certificate."
+    },
+    {
+      "test_id": "164.312(c)(1)-001",
+      "control_id": "164.312(c)(1)",
+      "control_name": "Integrity",
+      "test_name": "Verify soft-delete and retention policy for PHI records",
+      "file": "src/routes/diagnosis.routes.ts",
+      "line": 52,
+      "status": "FAILED",
+      "severity": "warn",
+      "finding": "Hard delete of records — review for ePHI",
+      "evidence": "Route handler at line 52 performs hard delete via `prisma.diagnosis.delete()`. No soft-delete column or retention policy detected.",
+      "remediation": "Replace hard delete with soft-delete column (`deletedAt`). Implement 6-year retention policy before permanent deletion."
+    }
+  ],
+  "summary": {
+    "blocking_violations": 7,
+    "warning_violations": 1,
+    "controls_triggered": [
+      "164.312(a)(1)",
+      "164.312(a)(2)(iv)",
+      "164.312(d)",
+      "164.312(e)(1)",
+      "164.312(c)(1)"
+    ],
+    "recommendation": "DO NOT MERGE until all blocking violations are remediated."
+  }
+}

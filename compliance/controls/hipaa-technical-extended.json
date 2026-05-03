@@ -107,8 +107,8 @@
       "bobguard": {
         "severity": "block",
         "code_patterns": [
-          { "lang": "ts", "kind": "regex", "match": "[+\\s].*\\b(dob|ssn|mrn|medicalRecordNumber|diagnosis|patientId|insuranceNumber)\\s*String", "comment": "Unencrypted PHI primitive type at rest" },
-          { "lang": "ts", "kind": "regex", "match": "[+\\s].*prisma\\.\\w+\\.(create|update|upsert)\\s*\\(\\s*\\{[^}]*data:\\s*\\{[^}]*(dob|ssn|mrn)\\s*:\\s*[^}]*\\}", "comment": "ORM write of PHI without encryption helper" },
+          { "lang": "ts", "kind": "regex", "match": "[+\\s].*\\b(dob|dateOfBirth|ssn|socialSecurityNumber|mrn|medicalRecordNumber|diagnosis|diagnoses|icd10|icd10Code|icdCode|notes|clinicalNotes|chartNotes|providerNotes|labResults|prescription|medication|patientId|insuranceNumber|insuranceId|policyNumber)\\s*String", "comment": "Unencrypted PHI primitive type at rest" },
+          { "lang": "ts", "kind": "regex", "match": "[+\\s].*prisma\\.\\w+\\.(create|update|upsert)\\s*\\(\\s*\\{[^}]*data:\\s*\\{[^}]*(dob|ssn|mrn|diagnosis|icd10Code|notes)\\s*:\\s*[^}]*\\}", "comment": "ORM write of PHI without encryption helper" },
           { "lang": "ts", "kind": "regex", "match": "[+\\s].*fs\\.writeFile.*\\b(patient|chart|record|ehr)\\b", "comment": "PHI written to disk via plain filesystem call" }
         ],
         "fix_template": "templates/fixes/encrypt-field-at-rest.ts",
@@ -214,7 +214,7 @@
       "bobguard": {
         "severity": "block",
         "code_patterns": [
-          { "lang": "ts", "kind": "regex", "match": "[+\\s].*https?://(?!localhost)[^/'\"]*\\b(api|service|partner)\\b[^'\"]*['\"]", "comment": "Outbound URL — verify HTTPS and not bare HTTP" },
+          { "lang": "ts", "kind": "regex", "match": "[+\\s].*https?://(?!localhost)[^/'\"\\n]*\\b(api|service|partner)\\b[^'\"\\n]*['\"]", "comment": "Outbound URL — verify HTTPS and not bare HTTP" },
           { "lang": "ts", "kind": "regex", "match": "[+\\s].*fetch\\s*\\(\\s*['\"]http://(?!localhost)", "comment": "Plain HTTP fetch outbound" },
           { "lang": "ts", "kind": "regex", "match": "\\+router\\.post\\(['\"]/(inbound|webhook|message)", "comment": "Webhook endpoint without TLS enforcement check" }
         ],
